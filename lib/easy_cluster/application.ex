@@ -84,7 +84,7 @@ defmodule EasyCluster.Application do
   end
 
   defp set_cookie() do
-    cookie = Application.fetch_env!(:easy_cluster, :cookie)
+    cookie = Application.get_env(:easy_cluster, :cookie, EasyCluster.Utils.random_cookie())
     Node.set_cookie(cookie)
   end
 
