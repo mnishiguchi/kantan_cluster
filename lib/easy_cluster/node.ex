@@ -1,7 +1,10 @@
 defmodule EasyCluster.Node do
   @moduledoc false
 
-  # Adopted from https://github.com/livebook-dev/livebook/blob/da8b55b9d1825c279914e85f75e8307e74e3e547/lib/livebook/application.ex
+  require Logger
+
+  # The basic structure here is adopted from Livebook.
+  # See https://github.com/livebook-dev/livebook/blob/da8b55b9d1825c279914e85f75e8307e74e3e547/lib/livebook/application.ex
 
   def start!() do
     ensure_distribution!()
@@ -9,15 +12,19 @@ defmodule EasyCluster.Node do
     set_cookie()
   end
 
-  def connect_to_other_nodes!() do
-    Application.get_env(:easy_cluster, :connect_to, [])
-    |> Enum.each(fn other_node ->
-      unless Node.connect(other_node) do
-        EasyCluster.Config.abort!("""
-        could not connect from #{node()} to #{other_node}
-        """)
-      end
+  def connect_to_other_nodes() do
+    nodes_to_connect = Application.get_env(:easy_cluster, :connect_to, []) -- Node.list()
+
+    Enum.each(nodes_to_connect, fn other_node ->
+      {:ok, _pid} = EasyCluster.NodeConnector.start_link(node: other_node)
     end)
+  end
+
+  def connected?(node) do
+    case Node.ping(node) do
+      :pong -> true
+      _ -> false
+    end
   end
 
   @doc """

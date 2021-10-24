@@ -8,7 +8,7 @@ defmodule EasyCluster.Application do
   @impl true
   def start(_type, _args) do
     EasyCluster.Node.start!()
-    EasyCluster.Node.connect_to_other_nodes!()
+    EasyCluster.Node.connect_to_other_nodes()
 
     children = [
       # Starts a worker by calling: EasyCluster.Worker.start_link(arg)

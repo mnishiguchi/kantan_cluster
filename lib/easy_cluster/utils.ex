@@ -1,8 +1,8 @@
 defmodule EasyCluster.Utils do
   @moduledoc false
 
-  # Many functions here are adopted from [LiveBook].
-  # [LiveBook]: https://github.com/livebook-dev/livebook/blob/da8b55b9d1825c279914e85f75e8307e74e3e547/lib/livebook/utils.ex
+  # random_* functions are adopted from LiveBook.
+  # See https://github.com/livebook-dev/livebook/blob/da8b55b9d1825c279914e85f75e8307e74e3e547/lib/livebook/utils.ex
 
   @type id :: binary()
 
