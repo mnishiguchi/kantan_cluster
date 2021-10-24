@@ -24,3 +24,5 @@ easy_cluster-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+/config/

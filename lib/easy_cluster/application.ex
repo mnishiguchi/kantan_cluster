@@ -11,6 +11,7 @@ defmodule EasyCluster.Application do
     ensure_distribution!()
     validate_hostname_resolution!()
     set_cookie()
+    connect_node_to_other_nodes!()
 
     children = [
       # Starts a worker by calling: EasyCluster.Worker.start_link(arg)
@@ -85,6 +86,17 @@ defmodule EasyCluster.Application do
   defp set_cookie() do
     cookie = Application.fetch_env!(:easy_cluster, :cookie)
     Node.set_cookie(cookie)
+  end
+
+  defp connect_node_to_other_nodes!() do
+    Application.get_env(:easy_cluster, :connect_to, [])
+    |> Enum.each(fn other_node ->
+      unless Node.connect(other_node) do
+        EasyCluster.Config.abort!("""
+        could not connect from #{node()} to #{other_node}
+        """)
+      end
+    end)
   end
 
   defp get_node_type_and_name() do
