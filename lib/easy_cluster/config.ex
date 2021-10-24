@@ -29,12 +29,6 @@ defmodule EasyCluster.Config do
     end
   end
 
-  @spec longnames_mode? :: boolean
-  def longnames_mode?, do: EasyCluster.Utils.node_host() =~ "."
-
-  @spec shortnames_mode? :: boolean
-  def shortnames_mode?, do: !longnames_mode?()
-
   @doc """
   Aborts booting due to a configuration error.
   """

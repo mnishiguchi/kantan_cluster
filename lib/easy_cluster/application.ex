@@ -7,11 +7,8 @@ defmodule EasyCluster.Application do
 
   @impl true
   def start(_type, _args) do
-    # Adopted from https://github.com/livebook-dev/livebook/blob/da8b55b9d1825c279914e85f75e8307e74e3e547/lib/livebook/application.ex
-    ensure_distribution!()
-    validate_hostname_resolution!()
-    set_cookie()
-    connect_node_to_other_nodes!()
+    EasyCluster.Node.start!()
+    EasyCluster.Node.connect_to_other_nodes!()
 
     children = [
       # Starts a worker by calling: EasyCluster.Worker.start_link(arg)
@@ -22,94 +19,5 @@ defmodule EasyCluster.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: EasyCluster.Supervisor]
     Supervisor.start_link(children, opts)
-  end
-
-  defp ensure_distribution!() do
-    unless Node.alive?() do
-      case System.cmd("epmd", ["-daemon"]) do
-        {_, 0} ->
-          :ok
-
-        _ ->
-          EasyCluster.Config.abort!("""
-          could not start epmd (Erlang Port Mapper Driver). EasyCluster uses epmd to \
-          talk to different runtimes.
-          """)
-      end
-
-      {type, name} = get_node_type_and_name()
-
-      case Node.start(name, type) do
-        {:ok, _} ->
-          :ok
-
-        {:error, reason} ->
-          EasyCluster.Config.abort!("could not start distributed node: #{inspect(reason)}")
-      end
-    end
-  end
-
-  import Record
-  defrecordp :hostent, Record.extract(:hostent, from_lib: "kernel/include/inet.hrl")
-
-  defp validate_hostname_resolution!() do
-    if EasyCluster.Config.shortnames_mode?() do
-      hostname = EasyCluster.Utils.node_host() |> to_charlist()
-
-      case :inet.gethostbyname(hostname) do
-        {:error, :nxdomain} ->
-          invalid_hostname!("your hostname \"#{hostname}\" does not resolve to an IP address")
-
-        {:ok, hostent(h_addrtype: :inet, h_addr_list: addresses)} ->
-          any_loopback? = Enum.any?(addresses, &match?({127, _, _, _}, &1))
-
-          unless any_loopback? do
-            invalid_hostname!(
-              "your hostname \"#{hostname}\" does not resolve to a loopback address (127.0.0.0/8)"
-            )
-          end
-
-        _ ->
-          :ok
-      end
-    end
-  end
-
-  defp invalid_hostname!(prelude) do
-    EasyCluster.Config.abort!("""
-    #{prelude}, which indicates something wrong in your OS configuration.
-
-    Make sure your computer's name resolves locally or start EasyCluster using a long distribution name.
-    """)
-  end
-
-  defp set_cookie() do
-    cookie = Application.get_env(:easy_cluster, :cookie, EasyCluster.Utils.random_cookie())
-    Node.set_cookie(cookie)
-  end
-
-  defp connect_node_to_other_nodes!() do
-    Application.get_env(:easy_cluster, :connect_to, [])
-    |> Enum.each(fn other_node ->
-      unless Node.connect(other_node) do
-        EasyCluster.Config.abort!("""
-        could not connect from #{node()} to #{other_node}
-        """)
-      end
-    end)
-  end
-
-  defp get_node_type_and_name() do
-    case Application.get_env(:easy_cluster, :node) do
-      nil ->
-        {:longnames, :"#{random_short_name()}@127.0.0.1"}
-
-      {type, name} when type in [:shortnames, :longnames] and is_atom(name) ->
-        {type, name}
-    end
-  end
-
-  defp random_short_name() do
-    :"easy_cluster_#{EasyCluster.Utils.random_short_id()}"
   end
 end

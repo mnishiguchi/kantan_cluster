@@ -29,13 +29,4 @@ defmodule EasyCluster.Utils do
   def random_cookie() do
     :"c_#{Base.url_encode64(:crypto.strong_rand_bytes(39))}"
   end
-
-  @doc """
-  Returns the host part of a node.
-  """
-  @spec node_host() :: binary()
-  def node_host() do
-    [_name, host] = node() |> Atom.to_string() |> :binary.split("@")
-    host
-  end
 end
