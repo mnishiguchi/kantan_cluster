@@ -1,4 +1,4 @@
-defmodule EasyCluster.Utils do
+defmodule KantanCluster.Utils do
   @moduledoc false
 
   # random_* functions are adopted from LiveBook.

@@ -1,4 +1,4 @@
-defmodule EasyCluster.NodeConnector do
+defmodule KantanCluster.NodeConnector do
   @moduledoc false
 
   use GenServer
@@ -8,6 +8,7 @@ defmodule EasyCluster.NodeConnector do
 
   ## API
 
+  @spec start_link(keyword) :: GenServer.on_start()
   def start_link(opts) do
     node = Keyword.fetch!(opts, :node)
 
@@ -17,6 +18,7 @@ defmodule EasyCluster.NodeConnector do
     end
   end
 
+  @spec whereis(atom) :: nil | pid
   def whereis(node) when is_atom(node) do
     case server_name(node) |> :global.whereis_name() do
       :undefined -> nil

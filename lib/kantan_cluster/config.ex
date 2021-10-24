@@ -1,4 +1,4 @@
-defmodule EasyCluster.Config do
+defmodule KantanCluster.Config do
   @moduledoc false
 
   @doc """
@@ -34,7 +34,7 @@ defmodule EasyCluster.Config do
   """
   @spec abort!(String.t()) :: no_return()
   def abort!(message) do
-    IO.puts("\nERROR!!! [EasyCluster] " <> message)
+    IO.puts("\nERROR!!! [KantanCluster] " <> message)
     System.halt(1)
   end
 end
