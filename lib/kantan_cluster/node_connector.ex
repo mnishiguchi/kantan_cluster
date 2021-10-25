@@ -59,14 +59,14 @@ defmodule KantanCluster.NodeConnector do
     end
   end
 
+  @spec connect_node(node()) :: boolean()
   defp connect_node(other_node) do
-    Node.connect(other_node)
-    |> tap(fn connected ->
-      if connected do
-        Logger.info("connected from #{Node.self()} to #{other_node}")
-      else
-        Logger.warning("could not connect from #{Node.self()} to #{other_node}")
-      end
-    end)
+    if connected = Node.connect(other_node) do
+      Logger.info("connected from #{Node.self()} to #{other_node}")
+    else
+      Logger.warning("could not connect from #{Node.self()} to #{other_node}")
+    end
+
+    connected
   end
 end
