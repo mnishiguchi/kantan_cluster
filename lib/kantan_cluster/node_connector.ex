@@ -52,8 +52,8 @@ defmodule KantanCluster.NodeConnector do
   def handle_info(:tick, state) do
     Process.send_after(self(), :tick, @polling_interval_ms)
 
-    if state.connected do
-      {:noreply, state}
+    if KantanCluster.Node.connected?(state.node) do
+      {:noreply, %{state | connected: true}}
     else
       {:noreply, %{state | connected: connect_node(state.node)}}
     end
