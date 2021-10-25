@@ -30,7 +30,7 @@ defmodule KantanCluster.Utils do
     :"c_#{Base.url_encode64(:crypto.strong_rand_bytes(39))}"
   end
 
-    @doc """
+  @doc """
   Parses the cookie from env.
   """
   def get_cookie_from_env(env_key) do
