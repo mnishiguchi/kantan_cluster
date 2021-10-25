@@ -49,7 +49,7 @@ defmodule KantanCluster.NodeConnector do
     # reliable for monitoring connected nodes.
     Process.send_after(self(), :tick, @polling_interval_ms)
 
-    unless KantanCluster.Node.connected?(state.connect_to) do
+    if :pang == Node.ping(state.connect_to) do
       connect_node(state.connect_to)
     end
 

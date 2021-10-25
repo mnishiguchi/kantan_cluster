@@ -20,14 +20,6 @@ defmodule KantanCluster.Node do
     end)
   end
 
-  @spec connected?(node()) :: boolean
-  def connected?(node) do
-    case Node.ping(node) do
-      :pong -> true
-      _ -> false
-    end
-  end
-
   @doc """
   Returns the host part of a node.
   """
