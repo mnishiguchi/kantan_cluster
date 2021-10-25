@@ -38,21 +38,15 @@ defmodule KantanCluster.NodeConnector do
   @impl GenServer
   def init(%{connect_to: connect_to}) do
     connect_node(connect_to)
-    Node.monitor(connect_to, true)
     send(self(), :tick)
 
     {:ok, %{connect_to: connect_to}}
   end
 
   @impl GenServer
-  def handle_info({:nodedown, node_down}, state) do
-    Logger.warning("#{node_down} is down")
-
-    {:noreply, state}
-  end
-
-  @impl GenServer
   def handle_info(:tick, state) do
+    # Node.monitor/2 does not trigger :nodedown every now and then. Pinging periodically is more
+    # reliable for monitoring connected nodes.
     Process.send_after(self(), :tick, @polling_interval_ms)
 
     unless KantanCluster.Node.connected?(state.connect_to) do
