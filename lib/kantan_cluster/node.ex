@@ -42,7 +42,7 @@ defmodule KantanCluster.Node do
           :ok
 
         _ ->
-          KantanCluster.Config.abort!("""
+          KantanCluster.Utils.abort!("""
           could not start epmd (Erlang Port Mapper Driver). KantanCluster uses epmd to \
           talk to different runtimes.
           """)
@@ -55,7 +55,7 @@ defmodule KantanCluster.Node do
           :ok
 
         {:error, reason} ->
-          KantanCluster.Config.abort!("could not start distributed node: #{inspect(reason)}")
+          KantanCluster.Utils.abort!("could not start distributed node: #{inspect(reason)}")
       end
     end
   end
@@ -92,7 +92,7 @@ defmodule KantanCluster.Node do
 
   @spec invalid_hostname!(binary()) :: no_return()
   def invalid_hostname!(prelude) do
-    KantanCluster.Config.abort!("""
+    KantanCluster.Utils.abort!("""
     #{prelude}, which indicates something wrong in your OS configuration.
 
     Make sure your computer's name resolves locally or start KantanCluster using a long distribution name.

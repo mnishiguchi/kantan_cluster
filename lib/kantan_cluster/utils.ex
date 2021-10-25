@@ -29,4 +29,22 @@ defmodule KantanCluster.Utils do
   def random_cookie() do
     :"c_#{Base.url_encode64(:crypto.strong_rand_bytes(39))}"
   end
+
+    @doc """
+  Parses the cookie from env.
+  """
+  def get_cookie_from_env(env_key) do
+    if cookie = System.get_env(env_key) do
+      String.to_atom(cookie)
+    end
+  end
+
+  @doc """
+  Aborts booting due to a configuration error.
+  """
+  @spec abort!(String.t()) :: no_return()
+  def abort!(message) do
+    IO.puts("\nERROR!!! [KantanCluster] " <> message)
+    System.halt(1)
+  end
 end
