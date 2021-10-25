@@ -13,8 +13,11 @@ defmodule KantanCluster.NodeConnector do
     node = Keyword.fetch!(opts, :node)
 
     case whereis(node) do
-      nil -> GenServer.start_link(__MODULE__, %{node: node}, name: {:global, server_name(node)})
-      pid -> {:ok, pid}
+      nil ->
+        Singleton.start_child(__MODULE__, %{node: node}, server_name(node))
+
+      pid ->
+        {:ok, pid}
     end
   end
 
