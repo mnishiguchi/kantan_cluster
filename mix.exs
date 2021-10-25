@@ -9,7 +9,7 @@ defmodule KantanCluster.MixProject do
       app: :kantan_cluster,
       version: @version,
       description: "Form a simple Erlang cluster easily in Elixir",
-      elixir: "~> 1.11",
+      elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
