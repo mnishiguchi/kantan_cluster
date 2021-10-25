@@ -10,11 +10,11 @@ defmodule KantanCluster.NodeConnector do
 
   @spec start_link(keyword) :: GenServer.on_start()
   def start_link(opts) do
-    node = Keyword.fetch!(opts, :node)
+    connect_to = Keyword.fetch!(opts, :connect_to)
 
-    case whereis(node) do
+    case whereis(connect_to) do
       nil ->
-        Singleton.start_child(__MODULE__, %{node: node}, server_name(node))
+        Singleton.start_child(__MODULE__, %{connect_to: connect_to}, server_name(connect_to))
 
       pid ->
         {:ok, pid}
@@ -22,52 +22,52 @@ defmodule KantanCluster.NodeConnector do
   end
 
   @spec whereis(atom) :: nil | pid
-  def whereis(node) when is_atom(node) do
-    case server_name(node) |> :global.whereis_name() do
+  def whereis(connect_to) when is_atom(connect_to) do
+    case server_name(connect_to) |> :global.whereis_name() do
       :undefined -> nil
       pid -> pid
     end
   end
 
-  defp server_name(node) when is_atom(node) do
-    {__MODULE__, node}
+  defp server_name(connect_to) when is_atom(connect_to) do
+    {__MODULE__, connect_to}
   end
 
   ## Callback
 
   @impl GenServer
-  def init(%{node: other_node}) do
-    connected = connect_node(other_node)
-    Node.monitor(other_node, true)
+  def init(%{connect_to: connect_to}) do
+    connect_node(connect_to)
+    Node.monitor(connect_to, true)
     send(self(), :tick)
 
-    {:ok, %{node: other_node, connected: connected}}
+    {:ok, %{connect_to: connect_to}}
   end
 
   @impl GenServer
-  def handle_info({:nodedown, node}, state) do
-    Logger.warning("#{node} is down")
+  def handle_info({:nodedown, node_down}, state) do
+    Logger.warning("#{node_down} is down")
 
-    {:noreply, %{state | connected: false}}
+    {:noreply, state}
   end
 
   @impl GenServer
   def handle_info(:tick, state) do
     Process.send_after(self(), :tick, @polling_interval_ms)
 
-    if KantanCluster.Node.connected?(state.node) do
-      {:noreply, %{state | connected: true}}
-    else
-      {:noreply, %{state | connected: connect_node(state.node)}}
+    unless KantanCluster.Node.connected?(state.connect_to) do
+      connect_node(state.connect_to)
     end
+
+    {:noreply, state}
   end
 
   @spec connect_node(node()) :: boolean()
-  defp connect_node(other_node) do
-    if connected = Node.connect(other_node) do
-      Logger.info("connected from #{Node.self()} to #{other_node}")
+  defp connect_node(connect_to) do
+    if connected = Node.connect(connect_to) do
+      Logger.info("connected from #{Node.self()} to #{connect_to}")
     else
-      Logger.warning("could not connect from #{Node.self()} to #{other_node}")
+      Logger.warning("could not connect from #{Node.self()} to #{connect_to}")
     end
 
     connected

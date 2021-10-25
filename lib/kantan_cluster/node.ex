@@ -15,8 +15,8 @@ defmodule KantanCluster.Node do
   @spec connect_to_other_nodes() :: :ok
   def connect_to_other_nodes() do
     Application.get_env(:kantan_cluster, :connect_to, [])
-    |> Enum.each(fn other_node ->
-      {:ok, _pid} = KantanCluster.NodeConnector.start_link(node: other_node)
+    |> Enum.each(fn connect_to ->
+      {:ok, _pid} = KantanCluster.NodeConnector.start_link(connect_to: connect_to)
     end)
   end
 
