@@ -7,6 +7,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - elixir: 1.11
+            otp: 23
           - elixir: 1.12
             otp: 24
     steps:
@@ -53,6 +55,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - elixir: 1.11
+            otp: 23
           - elixir: 1.12
             otp: 24
     steps:
@@ -99,6 +103,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - elixir: 1.11
+            otp: 23
           - elixir: 1.12
             otp: 24
     steps:
