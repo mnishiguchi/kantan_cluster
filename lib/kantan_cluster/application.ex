@@ -7,13 +7,9 @@ defmodule KantanCluster.Application do
 
   @impl Application
   def start(_type, _args) do
-    KantanCluster.Node.start!()
-    KantanCluster.Node.connect_to_other_nodes()
+    KantanCluster.start()
 
-    children = [
-      # Starts a worker by calling: KantanCluster.Worker.start_link(arg)
-      # {KantanCluster.Worker, arg}
-    ]
+    children = []
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

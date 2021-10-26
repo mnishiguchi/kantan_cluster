@@ -39,12 +39,15 @@ defmodule KantanCluster.Utils do
     end
   end
 
-  @doc """
-  Aborts booting due to a configuration error.
-  """
-  @spec abort!(String.t()) :: no_return()
-  def abort!(message) do
-    IO.puts("\nERROR!!! [KantanCluster] " <> message)
-    System.halt(1)
+  @spec node_hostname() :: binary()
+  def node_hostname() do
+    [_name, host] = node() |> Atom.to_string() |> :binary.split("@")
+    host
   end
+
+  @spec longnames_mode? :: boolean
+  def longnames_mode?, do: node_hostname() =~ "."
+
+  @spec shortnames_mode? :: boolean
+  def shortnames_mode?, do: !longnames_mode?()
 end

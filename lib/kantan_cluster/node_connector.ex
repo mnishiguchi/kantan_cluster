@@ -1,29 +1,38 @@
 defmodule KantanCluster.NodeConnector do
   @moduledoc false
 
-  use GenServer
+  # When a server is unneeded, we want to stop it immediately.
+  use GenServer, restart: :transient, shutdown: 0
+
   require Logger
 
   @polling_interval_ms :timer.seconds(5)
 
   ## API
 
-  @spec start_link(keyword) :: GenServer.on_start()
-  def start_link(opts) do
-    connect_to = Keyword.fetch!(opts, :connect_to)
-
+  @doc """
+  Connects to a specified node and start monitoring it.
+  """
+  @spec start_link(node()) :: GenServer.on_start()
+  def start_link(connect_to) do
     case whereis(connect_to) do
-      nil ->
-        Singleton.start_child(__MODULE__, %{connect_to: connect_to}, server_name(connect_to))
-
-      pid ->
-        {:ok, pid}
+      nil -> Singleton.start_child(__MODULE__, connect_to, server_name(connect_to))
+      pid -> {:ok, pid}
     end
   end
 
-  @spec whereis(atom) :: nil | pid
-  def whereis(connect_to) when is_atom(connect_to) do
-    case server_name(connect_to) |> :global.whereis_name() do
+  @doc """
+  Disconnects from a specified node and stops monitoring it.
+  """
+  @spec disconnect(node()) :: :ok
+  def disconnect(node_name) do
+    Node.disconnect(node_name)
+    whereis(node_name) |> GenServer.stop(:normal)
+  end
+
+  @spec whereis(node()) :: nil | pid
+  def whereis(node_name) when is_atom(node_name) do
+    case server_name(node_name) |> :global.whereis_name() do
       :undefined -> nil
       pid -> pid
     end
@@ -36,7 +45,7 @@ defmodule KantanCluster.NodeConnector do
   ## Callback
 
   @impl GenServer
-  def init(%{connect_to: connect_to}) do
+  def init(connect_to) do
     connect_node(connect_to)
     send(self(), :tick)
 
@@ -45,15 +54,20 @@ defmodule KantanCluster.NodeConnector do
 
   @impl GenServer
   def handle_info(:tick, state) do
-    # Node.monitor/2 does not trigger :nodedown every now and then. Pinging periodically is more
-    # reliable for monitoring connected nodes.
-    Process.send_after(self(), :tick, @polling_interval_ms)
+    if Node.self() == :nonode@nohost do
+      # If node is stopped, there is no need for monitoring.
+      {:stop, :normal, state}
+    else
+      # Node.monitor/2 does not trigger :nodedown every now and then. Pinging
+      # periodically is more reliable for monitoring connected nodes.
+      Process.send_after(self(), :tick, @polling_interval_ms)
 
-    if :pang == Node.ping(state.connect_to) do
-      connect_node(state.connect_to)
+      if :pang == Node.ping(state.connect_to) do
+        connect_node(state.connect_to)
+      end
+
+      {:noreply, state}
     end
-
-    {:noreply, state}
   end
 
   @spec connect_node(node()) :: boolean()
