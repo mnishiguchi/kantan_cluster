@@ -2,7 +2,7 @@ defmodule KantanCluster.NodeConnector do
   @moduledoc false
 
   # When a server is unneeded, we want to stop it immediately.
-  use GenServer, restart: :transient, shutdown: 0
+  use GenServer, restart: :transient
 
   require Logger
 
@@ -19,7 +19,7 @@ defmodule KantanCluster.NodeConnector do
       :ignore
     else
       case whereis(connect_to) do
-        nil -> Singleton.start_child(__MODULE__, connect_to, server_name(connect_to))
+        nil -> GenServer.start_link(__MODULE__, connect_to, name: via(connect_to))
         pid -> {:ok, pid}
       end
     end
@@ -36,14 +36,11 @@ defmodule KantanCluster.NodeConnector do
 
   @spec whereis(node()) :: nil | pid
   def whereis(node_name) when is_atom(node_name) do
-    case server_name(node_name) |> :global.whereis_name() do
-      :undefined -> nil
-      pid -> pid
-    end
+    KantanCluster.ProcessRegistry.whereis(node_name)
   end
 
-  defp server_name(connect_to) when is_atom(connect_to) do
-    {__MODULE__, connect_to}
+  defp via(connect_to) when is_atom(connect_to) do
+    KantanCluster.ProcessRegistry.via(connect_to)
   end
 
   ## Callback

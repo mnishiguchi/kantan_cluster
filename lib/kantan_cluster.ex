@@ -3,10 +3,14 @@ defmodule KantanCluster do
   Form a simple Erlang cluster easily in Elixir.
   """
 
+  @typedoc """
+  A node type.
+  See https://hexdocs.pm/elixir/1.12/Node.html#start/3
+  """
   @type node_type :: :longnames | :shortnames
 
   @typedoc """
-  Options for a cluster
+  Options for a cluster.
 
   * `:node` - the name of a node that we want to start (default: `{:longnames, :"xxxx@127.0.0.1"}` where `xxxx` is a random string)
   * `:cookie` - [Erlang magic cookie] to form a cluster (default: random cookie)
@@ -57,15 +61,15 @@ defmodule KantanCluster do
   """
   @spec connect(node() | [node()]) :: GenServer.on_start() | [GenServer.on_start()]
   def connect(connect_to) when is_atom(connect_to) do
-    KantanCluster.NodeConnector.start_link(connect_to)
+    KantanCluster.NodeConnectorSupervisor.find_or_start_child_process(connect_to)
   end
 
   def connect(connect_to) when is_list(connect_to) do
-    connect_to |> Enum.map(&KantanCluster.NodeConnector.start_link/1)
+    connect_to |> Enum.map(&KantanCluster.NodeConnectorSupervisor.find_or_start_child_process/1)
   end
 
   @doc """
-  Disconnect current node from speficied nodes.
+  Disconnects current node from speficied nodes.
   """
   @spec disconnect(node() | [node()]) :: :ok
   def disconnect(node_name) when is_atom(node_name) do

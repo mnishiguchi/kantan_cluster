@@ -7,9 +7,10 @@ defmodule KantanCluster.Application do
 
   @impl Application
   def start(_type, _args) do
-    KantanCluster.start()
-
-    children = []
+    children = [
+      KantanCluster.ProcessRegistry,
+      KantanCluster.NodeConnectorSupervisor
+    ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
