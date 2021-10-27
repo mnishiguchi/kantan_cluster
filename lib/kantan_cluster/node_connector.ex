@@ -15,9 +15,13 @@ defmodule KantanCluster.NodeConnector do
   """
   @spec start_link(node()) :: GenServer.on_start()
   def start_link(connect_to) do
-    case whereis(connect_to) do
-      nil -> Singleton.start_child(__MODULE__, connect_to, server_name(connect_to))
-      pid -> {:ok, pid}
+    if Node.self() == :nonode@nohost do
+      :ignore
+    else
+      case whereis(connect_to) do
+        nil -> Singleton.start_child(__MODULE__, connect_to, server_name(connect_to))
+        pid -> {:ok, pid}
+      end
     end
   end
 
