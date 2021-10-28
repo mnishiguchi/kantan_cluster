@@ -53,6 +53,8 @@ KantanCluster.connect(:"nerves@nerves-mn01.local")
 KantanCluster.disconnect(:"nerves@nerves-mn01.local")
 ```
 
+For cleanup, just call `KantanCluster.stop/0`, which will stop the node and all the connections.
+
 Some code is adopted from [`livebook`]. Thanks you!
 
 <!-- Links -->
