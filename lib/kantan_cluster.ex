@@ -49,7 +49,7 @@ defmodule KantanCluster do
   end
 
   @doc """
-  Stops a node and `KantanCluster.NodeConnector` server.
+  Stops a node.
   """
   def stop() do
     # KantanCluster.NodeConnector will be stopped when node gets stopped.
