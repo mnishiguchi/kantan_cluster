@@ -6,8 +6,7 @@ defmodule KantanCluster do
   require Logger
 
   @typedoc """
-  A node type.
-  See https://hexdocs.pm/elixir/1.12/Node.html#start/3
+  A node type. See `Node.start/3`.
   """
   @type node_type :: :longnames | :shortnames
 
@@ -18,6 +17,7 @@ defmodule KantanCluster do
   * `:cookie` - [Erlang magic cookie] to form a cluster (default: random cookie)
   * `:connect_to` - a list of nodes we want our node to be connected with (default: `[]`)
 
+  [Erlang magic cookie]: https://erlang.org/doc/reference_manual/distributed.html#security
   """
   @type option() ::
           {:node, {node_type, node}}
@@ -50,7 +50,7 @@ defmodule KantanCluster do
   end
 
   @doc """
-  Stops a node.
+  Stops a node and all the connections.
   """
   def stop() do
     # KantanCluster.NodeConnector will be stopped when node gets stopped.
