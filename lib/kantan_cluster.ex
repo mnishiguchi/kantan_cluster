@@ -12,7 +12,7 @@ defmodule KantanCluster do
   @typedoc """
   Options for a cluster.
 
-  * `:node` - the name of a node that we want to start (default: `{:longnames, :"xxxx@127.0.0.1"}` where `xxxx` is a random string)
+  * `:node` - a name of the node that you want to start (default: `{:longnames, :"xxxx@yyyy.local"}` where `xxxx` is a random string, `yyyy` is the hostname of a machine)
   * `:cookie` - [Erlang magic cookie] to form a cluster (default: random cookie)
   * `:connect_to` - a list of nodes we want our node to be connected with (default: `[]`)
 
@@ -27,7 +27,6 @@ defmodule KantanCluster do
   options can be specified as an argument
 
       KantanCluster.start(
-        node: {:longnames, :"node1@127.0.0.1"},
         cookie: :hello,
         connect_to: [:"nerves@nerves-mn00.local"]
       )
@@ -35,17 +34,17 @@ defmodule KantanCluster do
   or in your `config/config.exs`.
 
       config :kantan_cluster,
-        node: {:longnames, :"node1@127.0.0.1"},
         cookie: :hello,
         connect_to: [:"nerves@nerves-mn00.local"]
 
   """
-  @spec start([option()]) :: GenServer.on_start() | [GenServer.on_start()]
+  @spec start([option()]) :: :ok
   def start(opts \\ []) when is_list(opts) do
     ensure_distribution!(opts)
     validate_hostname_resolution!()
     set_cookie(opts)
     KantanCluster.Config.get_connect_to_option(opts) |> connect()
+    :ok
   end
 
   @doc """
@@ -59,7 +58,7 @@ defmodule KantanCluster do
   @doc """
   Connects current node to specified nodes.
   """
-  @spec connect(node() | [node()]) :: GenServer.on_start() | [GenServer.on_start()]
+  @spec connect(node() | [node()]) :: pid() | nil | list()
   def connect(connect_to) when is_atom(connect_to) do
     KantanCluster.NodeConnectorSupervisor.find_or_start_child_process(connect_to)
   end
