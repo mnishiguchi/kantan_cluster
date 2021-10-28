@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2021-10-28
+
+- Detect hostname for the default node name
+- Remove unused singleton from dependencies
+- Log when node is already started
+
 ## [0.2.0] - 2021-10-27
 
 - Add top-level API
@@ -26,7 +32,8 @@ Improvements
 ## [0.1.0] - 2021-10-25
 - Initial release
 
-[Unreleased]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.2.0..HEAD
+[Unreleased]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.2.1..HEAD
+[0.2.1]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.2.0..v0.2.1
 [0.2.0]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.1.1..v0.2.0
 [0.1.1]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.1.0..v0.1.1
 [0.1.0]: https://github.com/mnishiguchi/kantan_cluster/releases/tag/v0.1.0
