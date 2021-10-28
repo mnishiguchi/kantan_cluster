@@ -6,7 +6,7 @@ defmodule KantanCluster.NodeConnectorSupervisor do
   ## API
 
   @doc """
-  Starts a supervisor for a specified node name.
+  Starts a supervisor for `NodeConnector` servers.
   """
   @spec start_link(any()) :: {:error, any()} | {:ok, pid()}
   def start_link(_init_arg) do
@@ -14,7 +14,7 @@ defmodule KantanCluster.NodeConnectorSupervisor do
   end
 
   @doc """
-  Find or create a child process for a specified node name.
+  Finds or creates a child process for a specified node name.
   """
   @spec find_or_start_child_process(node()) :: pid | nil
   def find_or_start_child_process(node_name) do
@@ -22,7 +22,7 @@ defmodule KantanCluster.NodeConnectorSupervisor do
   end
 
   @doc """
-  List all the children.
+  Lists all the children.
   """
   @spec which_children() ::
           [{any(), :restarting | :undefined | pid(), :supervisor | :worker, :dynamic | [atom()]}]
@@ -32,7 +32,7 @@ defmodule KantanCluster.NodeConnectorSupervisor do
   end
 
   @doc """
-  List the registry keys of all the children.
+  Lists the registry keys of all the children.
   """
   @spec keys() :: [node()]
   def keys() do
@@ -52,7 +52,7 @@ defmodule KantanCluster.NodeConnectorSupervisor do
     case start_child(node_name) do
       {:ok, pid} -> pid
       {:error, {:already_started, pid}} -> pid
-      error -> error
+      other -> other
     end
   end
 
