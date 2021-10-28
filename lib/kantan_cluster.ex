@@ -3,6 +3,8 @@ defmodule KantanCluster do
   Form a simple Erlang cluster easily in Elixir.
   """
 
+  require Logger
+
   @typedoc """
   A node type.
   See https://hexdocs.pm/elixir/1.12/Node.html#start/3
@@ -82,7 +84,9 @@ defmodule KantanCluster do
 
   @spec ensure_distribution!(keyword()) :: :ok
   defp ensure_distribution!(opts) do
-    unless Node.alive?() do
+    if Node.alive?() do
+      Logger.info("distributed node already started: #{Node.self()}")
+    else
       case System.cmd("epmd", ["-daemon"]) do
         {_, 0} -> :ok
         _ -> raise("could not start epmd (Erlang Port Mapper Driver).")
