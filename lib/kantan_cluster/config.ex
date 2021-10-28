@@ -2,9 +2,11 @@ defmodule KantanCluster.Config do
   @moduledoc false
 
   def get_node_option(opts) do
+    {:ok, hostname} = :inet.gethostname()
+
     opts[:node] ||
       Application.get_env(:kantan_cluster, :node) ||
-      {:longnames, :"kantan_cluster_#{KantanCluster.Utils.random_short_id()}@127.0.0.1"}
+      {:longnames, :"n_#{KantanCluster.Utils.random_short_id()}@#{hostname}.local"}
   end
 
   def get_cookie_option(opts) do

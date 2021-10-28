@@ -37,8 +37,8 @@ defmodule KantanCluster.NodeConnectorSupervisor do
   @spec keys() :: [node()]
   def keys() do
     which_children()
-    |> Enum.reduce([], fn {_, pid, _, _}, acc ->
-      KantanCluster.ProcessRegistry.keys(pid) ++ acc
+    |> Enum.map(fn {_, pid, _, _} ->
+      KantanCluster.ProcessRegistry.key(pid)
     end)
   end
 
