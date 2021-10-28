@@ -12,7 +12,6 @@ defmodule KantanCluster.Config do
   def get_cookie_option(opts) do
     opts[:cookie] ||
       Application.get_env(:kantan_cluster, :cookie) ||
-      KantanCluster.Utils.get_cookie_from_env("COOKIE") ||
       KantanCluster.Utils.random_cookie()
   end
 
