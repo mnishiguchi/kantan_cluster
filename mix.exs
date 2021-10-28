@@ -33,8 +33,7 @@ defmodule KantanCluster.MixProject do
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
-      {:mix_test_watch, "~> 1.1", only: :dev, runtime: false},
-      {:singleton, "~> 1.0"}
+      {:mix_test_watch, "~> 1.1", only: :dev, runtime: false}
     ]
   end
 
