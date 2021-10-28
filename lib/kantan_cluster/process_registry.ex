@@ -1,9 +1,9 @@
 defmodule KantanCluster.ProcessRegistry do
   @moduledoc false
 
-  @type key() :: any()
+  @type key :: any
 
-  @spec child_spec(any()) :: Supervisor.child_spec()
+  @spec child_spec(any) :: Supervisor.child_spec()
   def child_spec(_args) do
     Supervisor.child_spec(
       Registry,
@@ -12,7 +12,7 @@ defmodule KantanCluster.ProcessRegistry do
     )
   end
 
-  @spec start_link() :: {:error, any()} | {:ok, pid()}
+  @spec start_link() :: {:error, any} | {:ok, pid}
   def start_link() do
     Registry.start_link(keys: :unique, name: __MODULE__)
   end
@@ -26,7 +26,7 @@ defmodule KantanCluster.ProcessRegistry do
       {:via, Registry, {KantanCluster.ProcessRegistry, :"nerves@nerves-mn00.local"}}
 
   """
-  @spec via(key()) :: {:via, Registry, {KantanCluster.ProcessRegistry, key()}}
+  @spec via(key) :: {:via, Registry, {KantanCluster.ProcessRegistry, key}}
   def via(key) do
     {:via, Registry, {__MODULE__, key}}
   end
@@ -34,7 +34,7 @@ defmodule KantanCluster.ProcessRegistry do
   @doc """
   Finds a process id for a given key.
   """
-  @spec whereis(key()) :: pid() | nil
+  @spec whereis(key) :: pid | nil
   def whereis(key) do
     case Registry.whereis_name({__MODULE__, key}) do
       :undefined -> nil
@@ -45,7 +45,7 @@ defmodule KantanCluster.ProcessRegistry do
   @doc """
   Finds a key for a given process.
   """
-  @spec key(pid()) :: key()
+  @spec key(pid) :: key
   def key(pid) do
     Registry.keys(__MODULE__, pid) |> hd()
   end

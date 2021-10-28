@@ -20,9 +20,9 @@ defmodule KantanCluster do
 
   """
   @type option() ::
-          {:node, {node_type(), node()}}
-          | {:cookie, atom()}
-          | {:connect_to, node() | [node()]}
+          {:node, {node_type, node}}
+          | {:cookie, atom}
+          | {:connect_to, node | [node]}
 
   @doc """
   Starts a node and attempts to connect it to specified nodes. Configuration
@@ -40,7 +40,7 @@ defmodule KantanCluster do
         connect_to: [:"nerves@nerves-mn00.local"]
 
   """
-  @spec start([option()]) :: :ok
+  @spec start([option]) :: :ok
   def start(opts \\ []) when is_list(opts) do
     ensure_distribution!(opts)
     validate_hostname_resolution!()
@@ -60,7 +60,7 @@ defmodule KantanCluster do
   @doc """
   Connects current node to specified nodes.
   """
-  @spec connect(node() | [node()]) :: pid() | nil | list()
+  @spec connect(node | [node]) :: pid | nil | list
   def connect(connect_to) when is_atom(connect_to) do
     KantanCluster.NodeConnectorSupervisor.find_or_start_child_process(connect_to)
   end
@@ -72,7 +72,7 @@ defmodule KantanCluster do
   @doc """
   Disconnects current node from speficied nodes.
   """
-  @spec disconnect(node() | [node()]) :: :ok
+  @spec disconnect(node | [node]) :: :ok
   def disconnect(node_name) when is_atom(node_name) do
     KantanCluster.NodeConnector.disconnect(node_name)
   end
@@ -82,7 +82,7 @@ defmodule KantanCluster do
     :ok
   end
 
-  @spec ensure_distribution!(keyword()) :: :ok
+  @spec ensure_distribution!(keyword) :: :ok
   defp ensure_distribution!(opts) do
     if Node.alive?() do
       Logger.info("distributed node already started: #{Node.self()}")
@@ -131,7 +131,7 @@ defmodule KantanCluster do
 
   defp validate_hostname_resolution!(_), do: :ok
 
-  @spec invalid_hostname!(binary()) :: no_return()
+  @spec invalid_hostname!(binary) :: no_return
   defp invalid_hostname!(prelude) do
     raise("""
     #{prelude}, which indicates something wrong in your OS configuration.
@@ -140,7 +140,7 @@ defmodule KantanCluster do
     """)
   end
 
-  @spec set_cookie(keyword()) :: true
+  @spec set_cookie(keyword) :: true
   defp set_cookie(opts) do
     KantanCluster.Config.get_cookie_option(opts) |> Node.set_cookie()
   end

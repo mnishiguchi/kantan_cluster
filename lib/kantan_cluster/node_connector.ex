@@ -13,7 +13,7 @@ defmodule KantanCluster.NodeConnector do
   @doc """
   Connects to a specified node and start monitoring it.
   """
-  @spec start_link(node()) :: GenServer.on_start()
+  @spec start_link(node) :: GenServer.on_start()
   def start_link(connect_to) do
     if Node.self() == :nonode@nohost do
       :ignore
@@ -28,13 +28,13 @@ defmodule KantanCluster.NodeConnector do
   @doc """
   Disconnects from a specified node and stops monitoring it.
   """
-  @spec disconnect(node()) :: :ok
+  @spec disconnect(node) :: :ok
   def disconnect(node_name) do
     Node.disconnect(node_name)
     whereis(node_name) |> GenServer.stop(:normal)
   end
 
-  @spec whereis(node()) :: nil | pid
+  @spec whereis(node) :: nil | pid
   def whereis(node_name) when is_atom(node_name) do
     KantanCluster.ProcessRegistry.whereis(node_name)
   end
@@ -71,7 +71,7 @@ defmodule KantanCluster.NodeConnector do
     end
   end
 
-  @spec connect_node(node()) :: boolean()
+  @spec connect_node(node) :: boolean
   defp connect_node(connect_to) do
     if connected = Node.connect(connect_to) do
       Logger.info("connected from #{Node.self()} to #{connect_to}")
