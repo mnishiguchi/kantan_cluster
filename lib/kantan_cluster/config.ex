@@ -16,7 +16,7 @@ defmodule KantanCluster.Config do
     {:longnames, :"n_#{KantanCluster.Utils.random_short_id()}@#{hostname}.local"}
   end
 
-  defp parse_node_option(node_opt) do
+  defp parse_node_option(node_opt) when is_binary(node_opt) do
     {:ok, hostname} = :inet.gethostname()
     {:longnames, :"#{node_opt}@#{hostname}.local"}
   end

@@ -16,6 +16,10 @@ defmodule KantanCluster do
   * `:node`
     - the name of a node that you want to start
     - default: `{:longnames, :"xxxx@yyyy.local"}` where `xxxx` is a random string, `yyyy` is the hostname of a machine
+    - examples:
+      - `"node1"`
+      - `{:longnames, :"node1@nerves-mn00.local"`}
+      - `{:shortnames, :"node1@nerves-mn00"`}
   * `:cookie`
     - [Erlang magic cookie] to form a cluster
     - default: random cookie
@@ -26,7 +30,7 @@ defmodule KantanCluster do
   [Erlang magic cookie]: https://erlang.org/doc/reference_manual/distributed.html#security
   """
   @type option() ::
-          {:node, binary | atom | {node_type, node}}
+          {:node, binary | {node_type, node}}
           | {:cookie, atom}
           | {:connect_to, node | [node]}
 
