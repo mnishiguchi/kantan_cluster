@@ -73,28 +73,25 @@ defmodule KantanCluster do
   @doc """
   Connects current node to specified nodes.
   """
-  @spec connect(node) :: pid | nil
-  def connect(connect_to) when is_atom(connect_to) do
-    KantanCluster.NodeConnectorSupervisor.find_or_start_child_process(connect_to)
-  end
+  @spec connect(node | [node]) :: {:ok, [pid]}
+  def connect(connect_to) when is_atom(connect_to), do: connect([connect_to])
 
-  @spec connect([node]) :: [pid | nil]
   def connect(connect_to) when is_list(connect_to) do
-    connect_to |> Enum.map(&connect/1)
+    pids =
+      connect_to
+      |> Enum.map(&KantanCluster.NodeConnectorSupervisor.find_or_start_child_process/1)
+
+    {:ok, pids}
   end
 
   @doc """
   Disconnects current node from speficied nodes.
   """
-  @spec disconnect(node) :: :ok
-  def disconnect(node_name) when is_atom(node_name) do
-    KantanCluster.NodeConnector.disconnect(node_name)
-  end
+  @spec disconnect(node | [node]) :: :ok
+  def disconnect(node_name) when is_atom(node_name), do: disconnect([node_name])
 
-  @spec disconnect([node]) :: :ok
   def disconnect(node_names) when is_list(node_names) do
-    node_names |> Enum.each(&KantanCluster.NodeConnector.disconnect/1)
-    :ok
+    :ok = node_names |> Enum.each(&KantanCluster.NodeConnector.disconnect/1)
   end
 
   @spec ensure_distribution!(keyword) :: :ok
