@@ -52,31 +52,34 @@ defmodule KantanCluster do
   @doc """
   Stops a node and all the connections.
   """
+  @spec stop :: :ok | {:error, :not_allowed | :not_found}
   def stop() do
-    # KantanCluster.NodeConnector will be stopped when node gets stopped.
+    KantanCluster.NodeConnectorSupervisor.terminate_children()
     Node.stop()
   end
 
   @doc """
   Connects current node to specified nodes.
   """
-  @spec connect(node | [node]) :: pid | nil | list
+  @spec connect(node) :: pid | nil
   def connect(connect_to) when is_atom(connect_to) do
     KantanCluster.NodeConnectorSupervisor.find_or_start_child_process(connect_to)
   end
 
+  @spec connect([node]) :: [pid | nil]
   def connect(connect_to) when is_list(connect_to) do
-    connect_to |> Enum.map(&KantanCluster.NodeConnectorSupervisor.find_or_start_child_process/1)
+    connect_to |> Enum.map(&connect/1)
   end
 
   @doc """
   Disconnects current node from speficied nodes.
   """
-  @spec disconnect(node | [node]) :: :ok
+  @spec disconnect(node) :: :ok
   def disconnect(node_name) when is_atom(node_name) do
     KantanCluster.NodeConnector.disconnect(node_name)
   end
 
+  @spec disconnect([node]) :: :ok
   def disconnect(node_names) when is_list(node_names) do
     node_names |> Enum.each(&KantanCluster.NodeConnector.disconnect/1)
     :ok

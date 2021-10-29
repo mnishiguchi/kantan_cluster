@@ -22,6 +22,22 @@ defmodule KantanCluster.NodeConnectorSupervisor do
   end
 
   @doc """
+  Terminates all the child processes.
+  """
+  @spec terminate_children :: [:ok | {:error, :not_found}]
+  def terminate_children() do
+    child_pids() |> Enum.map(&terminate_child/1)
+  end
+
+  @doc """
+  Terminates a specified child process.
+  """
+  @spec terminate_child(pid) :: :ok | {:error, :not_found}
+  def terminate_child(pid) when is_pid(pid) do
+    DynamicSupervisor.terminate_child(__MODULE__, pid)
+  end
+
+  @doc """
   Lists all the children.
   """
   @spec which_children() ::
@@ -32,14 +48,21 @@ defmodule KantanCluster.NodeConnectorSupervisor do
   end
 
   @doc """
+  Lists all the child pids that are currently known.
+  """
+  @spec child_pids :: [pid]
+  def child_pids() do
+    which_children()
+    |> Enum.filter(fn {_, pid, _, _} -> is_pid(pid) end)
+    |> Enum.map(fn {_, pid, _, _} -> pid end)
+  end
+
+  @doc """
   Lists the registry keys of all the children.
   """
   @spec keys :: [node]
   def keys() do
-    which_children()
-    |> Enum.map(fn {_, pid, _, _} ->
-      KantanCluster.ProcessRegistry.key(pid)
-    end)
+    child_pids() |> Enum.map(&KantanCluster.ProcessRegistry.key/1)
   end
 
   @spec existing_process(node) :: pid | nil
