@@ -7,10 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2021-10-28
+
+- Improve KantanCluster.stop/0
+- Write minimal unit tests
+- Enable unit tests in CI
+
 ## [0.2.1] - 2021-10-28
 
 - Detect hostname for the default node name
-- Remove unused singleton from dependencies
+- Remove unused [singleton](https://github.com/arjan/singleton) package from dependencies
 - Log when node is already started
 
 ## [0.2.0] - 2021-10-27
@@ -25,14 +31,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.1] - 2021-10-26
 
-Improvements
-
 - Use [singleton](https://github.com/arjan/singleton) package for supervised global processes
 
 ## [0.1.0] - 2021-10-25
 - Initial release
 
-[Unreleased]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.2.1..HEAD
+[Unreleased]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.2.2..HEAD
+[0.2.2]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.2.1..v0.2.2
 [0.2.1]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.2.0..v0.2.1
 [0.2.0]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.1.1..v0.2.0
 [0.1.1]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.1.0..v0.1.1
