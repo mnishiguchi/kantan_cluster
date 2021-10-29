@@ -13,7 +13,7 @@ defmodule KantanCluster.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
-      aliases: [],
+      aliases: aliases(),
       dialyzer: dialyzer(),
       docs: docs()
     ]
@@ -67,5 +67,13 @@ defmodule KantanCluster.MixProject do
         "GitHub" => @source_url
       }
     }
+  end
+
+  # Aliases are shortcuts or tasks specific to the current project.
+  # See the documentation for `Mix` for more info on aliases.
+  defp aliases do
+    [
+      format: ["format", "credo"]
+    ]
   end
 end
