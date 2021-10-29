@@ -13,14 +13,20 @@ defmodule KantanCluster do
   @typedoc """
   Options for a cluster.
 
-  * `:node` - a name of the node that you want to start (default: `{:longnames, :"xxxx@yyyy.local"}` where `xxxx` is a random string, `yyyy` is the hostname of a machine)
-  * `:cookie` - [Erlang magic cookie] to form a cluster (default: random cookie)
-  * `:connect_to` - a list of nodes we want our node to be connected with (default: `[]`)
+  * `:node`
+    - the name of a node that you want to start
+    - default: `{:longnames, :"xxxx@yyyy.local"}` where `xxxx` is a random string, `yyyy` is the hostname of a machine
+  * `:cookie`
+    - [Erlang magic cookie] to form a cluster
+    - default: random cookie
+  * `:connect_to`
+    - a list of nodes we want our node to be connected with
+    - default: `[]`
 
   [Erlang magic cookie]: https://erlang.org/doc/reference_manual/distributed.html#security
   """
   @type option() ::
-          {:node, {node_type, node}}
+          {:node, binary | atom | {node_type, node}}
           | {:cookie, atom}
           | {:connect_to, node | [node]}
 
@@ -29,6 +35,7 @@ defmodule KantanCluster do
   options can be specified as an argument
 
       KantanCluster.start(
+        node: "node1",
         cookie: :hello,
         connect_to: [:"nerves@nerves-mn00.local"]
       )
@@ -36,6 +43,7 @@ defmodule KantanCluster do
   or in your `config/config.exs`.
 
       config :kantan_cluster,
+        node: "node1",
         cookie: :hello,
         connect_to: [:"nerves@nerves-mn00.local"]
 
@@ -108,10 +116,12 @@ defmodule KantanCluster do
   defrecordp :hostent, Record.extract(:hostent, from_lib: "kernel/include/inet.hrl")
 
   defp validate_hostname_resolution!() do
-    validate_hostname_resolution!(KantanCluster.Utils.shortnames_mode?())
+    KantanCluster.Utils.node_hostname()
+    |> KantanCluster.Utils.shortnames_mode?()
+    |> validate_hostname_resolution!()
   end
 
-  defp validate_hostname_resolution!(_shortnames_mode = true) do
+  defp validate_hostname_resolution!(true = _shortnames_mode) do
     hostname = KantanCluster.Utils.node_hostname() |> to_charlist()
 
     case :inet.gethostbyname(hostname) do
@@ -132,7 +142,7 @@ defmodule KantanCluster do
     end
   end
 
-  defp validate_hostname_resolution!(_), do: :ok
+  defp validate_hostname_resolution!(false = _shortnames_mode), do: :ok
 
   @spec invalid_hostname!(binary) :: no_return
   defp invalid_hostname!(prelude) do

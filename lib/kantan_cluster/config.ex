@@ -2,11 +2,23 @@ defmodule KantanCluster.Config do
   @moduledoc false
 
   def get_node_option(opts) do
-    {:ok, hostname} = :inet.gethostname()
+    (opts[:node] || Application.get_env(:kantan_cluster, :node))
+    |> parse_node_option()
+  end
 
-    opts[:node] ||
-      Application.get_env(:kantan_cluster, :node) ||
-      {:longnames, :"n_#{KantanCluster.Utils.random_short_id()}@#{hostname}.local"}
+  # when node option is explicit
+  defp parse_node_option({:longnames, _} = node_opt), do: node_opt
+  defp parse_node_option({:shortnames, _} = node_opt), do: node_opt
+
+  # when node option is inplicit
+  defp parse_node_option(nil) do
+    {:ok, hostname} = :inet.gethostname()
+    {:longnames, :"n_#{KantanCluster.Utils.random_short_id()}@#{hostname}.local"}
+  end
+
+  defp parse_node_option(node_opt) do
+    {:ok, hostname} = :inet.gethostname()
+    {:longnames, :"#{node_opt}@#{hostname}.local"}
   end
 
   def get_cookie_option(opts) do

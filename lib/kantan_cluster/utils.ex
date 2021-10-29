@@ -43,9 +43,9 @@ defmodule KantanCluster.Utils do
     host
   end
 
-  @spec longnames_mode? :: boolean
-  def longnames_mode?(), do: node_hostname() =~ "."
+  @spec longnames_mode?(binary) :: boolean
+  def longnames_mode?(name) when is_binary(name), do: name =~ "."
 
-  @spec shortnames_mode? :: boolean
-  def shortnames_mode?(), do: !longnames_mode?()
+  @spec shortnames_mode?(binary) :: boolean
+  def shortnames_mode?(name) when is_binary(name), do: !longnames_mode?(name)
 end

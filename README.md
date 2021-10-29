@@ -25,16 +25,21 @@ end
 Start a node and connect it to other nodes based on specified [options].
 
 ```elixir
-KantanCluster.start(
+iex> KantanCluster.start(
+  node: "node1",
   cookie: :hello,
   connect_to: [:"nerves@nerves-mn00.local"]
 )
+:ok
+
+iex(node1@My-Machine.local)>
 ```
 
 Alternatively, [options] can be loaded from your `config/config.exs`.
 
 ```elixir
 config :kantan_cluster,
+  node: "node1",
   cookie: :hello,
   connect_to: [:"nerves@nerves-mn00.local"]
 ```
