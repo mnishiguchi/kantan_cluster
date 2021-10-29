@@ -1,4 +1,6 @@
-# KantanCluster (かんたんクラスター)
+# KantanCluster
+
+かんたんクラスター
 
 [![Hex version](https://img.shields.io/hexpm/v/kantan_cluster.svg 'Hex version')](https://hex.pm/packages/kantan_cluster)
 [![API docs](https://img.shields.io/hexpm/v/kantan_cluster.svg?label=docs 'API docs')](https://hexdocs.pm/kantan_cluster)

@@ -22,7 +22,7 @@ defmodule KantanCluster.ProcessRegistry do
 
   ## Examples
 
-      iex> ProcessRegistry.via(:"nerves@nerves-mn00.local")
+      iex> KantanCluster.ProcessRegistry.via(:"nerves@nerves-mn00.local")
       {:via, Registry, {KantanCluster.ProcessRegistry, :"nerves@nerves-mn00.local"}}
 
   """

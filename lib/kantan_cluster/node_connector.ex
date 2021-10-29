@@ -14,7 +14,7 @@ defmodule KantanCluster.NodeConnector do
   Connects to a specified node and start monitoring it.
   """
   @spec start_link(node) :: GenServer.on_start()
-  def start_link(connect_to) do
+  def start_link(connect_to) when is_atom(connect_to) do
     if Node.self() == :nonode@nohost do
       :ignore
     else
@@ -29,7 +29,7 @@ defmodule KantanCluster.NodeConnector do
   Disconnects from a specified node and stops monitoring it.
   """
   @spec disconnect(node) :: :ok
-  def disconnect(node_name) do
+  def disconnect(node_name) when is_atom(node_name) do
     Node.disconnect(node_name)
     whereis(node_name) |> GenServer.stop(:normal)
   end
