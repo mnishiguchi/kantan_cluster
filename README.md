@@ -8,7 +8,11 @@
 
 Form a simple Erlang cluster easily in Elixir.
 
-Documentation can be found at [https://hexdocs.pm/kantan_cluster](https://hexdocs.pm/kantan_cluster).
+- A wrapper of [`Node`] and [`Phoenix.PubSub`] with simple API
+- Reconnection forever in case nodes get disconnected
+
+[`Node`]: https://hexdocs.pm/elixir/Node.html
+[`Phoenix.PubSub`]: https://hexdocs.pm/phoenix_pubsub/Phoenix.PubSub.html
 
 ## Getting started
 
@@ -65,7 +69,7 @@ For cleanup, just call `KantanCluster.stop/0`, which will stop the node and all 
 ## Publish–subscribe
 
 ```elixir
-# Subscribes the caller to the PubSub adapter's topic.
+# Subscribes the caller to the KantanCluster's topic.
 KantanCluster.subscribe("users:123")
 
 # Broadcasts message on given topic across the whole cluster.
@@ -74,10 +78,13 @@ KantanCluster.broadcast("users:123", {:hello, Node.self()})
 
 ## Acknowledgements
 
-Some code is adopted from or inspired by [`livebook`].
+- This project is inspired by [nerves_pack（vintage_net含む）を使ってNerves起動時に`Node.connect()`するようにした by nishiuchikazuma](https://qiita.com/nishiuchikazuma/items/f68d2661959197d0765c).
+- [Forming an Erlang cluster of Pi Zeros by underjord](https://youtu.be/ZdtAVlzFf6Q) is a great hands-on tutorial for connecting multiple [Nerves] devices.
+- Some code is adopted from [`livebook`].
 
 <!-- Links -->
 
 [Erlang magic cookie]: https://erlang.org/doc/reference_manual/distributed.html#security
 [`livebook`]: https://github.com/livebook-dev/livebook
 [options]: https://hexdocs.pm/kantan_cluster/KantanCluster.html#t:option/0
+[Nerves]: https://www.nerves-project.org/
