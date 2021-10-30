@@ -56,7 +56,7 @@ defmodule KantanCluster do
   def start(opts \\ []) when is_list(opts) do
     ensure_distribution!(opts)
     validate_hostname_resolution!()
-    set_cookie(opts)
+    KantanCluster.Config.get_cookie_option(opts) |> Node.set_cookie()
     KantanCluster.Config.get_connect_to_option(opts) |> connect()
     :ok
   end
@@ -136,9 +136,7 @@ defmodule KantanCluster do
   defrecordp :hostent, Record.extract(:hostent, from_lib: "kernel/include/inet.hrl")
 
   defp validate_hostname_resolution!() do
-    KantanCluster.Utils.node_hostname()
-    |> KantanCluster.Utils.shortnames_mode?()
-    |> validate_hostname_resolution!()
+    validate_hostname_resolution!(KantanCluster.Utils.shortnames_mode?())
   end
 
   defp validate_hostname_resolution!(true = _shortnames_mode) do
@@ -171,10 +169,5 @@ defmodule KantanCluster do
 
     Make sure your computer's name resolves locally or start KantanCluster using a long distribution name.
     """)
-  end
-
-  @spec set_cookie(keyword) :: true
-  defp set_cookie(opts) do
-    KantanCluster.Config.get_cookie_option(opts) |> Node.set_cookie()
   end
 end

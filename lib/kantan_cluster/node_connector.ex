@@ -31,7 +31,7 @@ defmodule KantanCluster.NodeConnector do
   @spec disconnect(node) :: :ok
   def disconnect(node_name) when is_atom(node_name) do
     Node.disconnect(node_name)
-    whereis(node_name) |> GenServer.stop(:normal)
+    GenServer.stop(whereis(node_name), :normal)
   end
 
   @spec whereis(node) :: nil | pid
