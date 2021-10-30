@@ -78,8 +78,7 @@ defmodule KantanCluster do
 
   def connect(connect_to) when is_list(connect_to) do
     pids =
-      connect_to
-      |> Enum.map(&KantanCluster.NodeConnectorSupervisor.find_or_start_child_process/1)
+      Enum.map(connect_to, &KantanCluster.NodeConnectorSupervisor.find_or_start_child_process/1)
 
     {:ok, pids}
   end
@@ -91,19 +90,22 @@ defmodule KantanCluster do
   def disconnect(node_name) when is_atom(node_name), do: disconnect([node_name])
 
   def disconnect(node_names) when is_list(node_names) do
-    :ok = node_names |> Enum.each(&KantanCluster.NodeConnector.disconnect/1)
+    :ok = Enum.each(node_names, &KantanCluster.NodeConnector.disconnect/1)
   end
 
   @doc """
-  Subscribes the caller to the PubSub adapter's topic.
+  Subscribes the caller to a given topic.
 
   * topic - The topic to subscribe to, for example: "users:123"
   """
   @spec subscribe(binary) :: :ok | {:error, any}
   defdelegate subscribe(topic), to: KantanCluster.PubSub
 
+  @spec unsubscribe(binary) :: :ok
+  defdelegate unsubscribe(topic), to: KantanCluster.PubSub
+
   @doc """
-  Broadcasts message on given topic across the whole cluster.
+  Broadcasts message on a given topic across the whole cluster.
 
   * topic - The topic to broadcast to, ie: "users:123"
   * message - The payload of the broadcast

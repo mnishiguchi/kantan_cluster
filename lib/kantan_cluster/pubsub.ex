@@ -6,6 +6,11 @@ defmodule KantanCluster.PubSub do
     Phoenix.PubSub.subscribe(__MODULE__, topic)
   end
 
+  @spec unsubscribe(binary) :: :ok
+  def unsubscribe(topic) do
+    Phoenix.PubSub.unsubscribe(__MODULE__, topic)
+  end
+
   @spec broadcast(binary, any) :: :ok | {:error, any}
   def broadcast(topic, message) do
     Phoenix.PubSub.broadcast(__MODULE__, topic, message)
