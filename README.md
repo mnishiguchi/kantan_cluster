@@ -17,7 +17,7 @@ Add `kantan_cluster` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:kantan_cluster, "~> 0.2"}
+    {:kantan_cluster, "~> 0.3"}
   ]
 end
 ```
@@ -65,8 +65,10 @@ For cleanup, just call `KantanCluster.stop/0`, which will stop the node and all 
 ## Publish–subscribe
 
 ```elixir
+# Subscribes the caller to the PubSub adapter's topic.
 KantanCluster.subscribe("users:123")
 
+# Broadcasts message on given topic across the whole cluster.
 KantanCluster.broadcast("users:123", {:hello, Node.self()})
 ```
 
