@@ -9,7 +9,8 @@ defmodule KantanCluster.Application do
   def start(_type, _args) do
     children = [
       KantanCluster.ProcessRegistry,
-      KantanCluster.NodeConnectorSupervisor
+      KantanCluster.NodeConnectorSupervisor,
+      {Phoenix.PubSub, name: KantanCluster.PubSub}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

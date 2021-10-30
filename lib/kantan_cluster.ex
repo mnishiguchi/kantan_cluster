@@ -94,6 +94,23 @@ defmodule KantanCluster do
     :ok = node_names |> Enum.each(&KantanCluster.NodeConnector.disconnect/1)
   end
 
+  @doc """
+  Subscribes the caller to the PubSub adapter's topic.
+
+  * topic - The topic to subscribe to, for example: "users:123"
+  """
+  @spec subscribe(binary) :: :ok | {:error, any}
+  defdelegate subscribe(topic), to: KantanCluster.PubSub
+
+  @doc """
+  Broadcasts message on given topic across the whole cluster.
+
+  * topic - The topic to broadcast to, ie: "users:123"
+  * message - The payload of the broadcast
+  """
+  @spec broadcast(binary, any) :: :ok | {:error, any}
+  defdelegate broadcast(topic, message), to: KantanCluster.PubSub
+
   @spec ensure_distribution!(keyword) :: :ok
   defp ensure_distribution!(opts) do
     if Node.alive?() do

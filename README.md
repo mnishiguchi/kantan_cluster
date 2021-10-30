@@ -10,7 +10,7 @@ Form a simple Erlang cluster easily in Elixir.
 
 Documentation can be found at [https://hexdocs.pm/kantan_cluster](https://hexdocs.pm/kantan_cluster).
 
-### Getting started
+## Getting started
 
 Add `kantan_cluster` to your list of dependencies in `mix.exs`:
 
@@ -62,7 +62,17 @@ KantanCluster.disconnect(:"nerves@nerves-mn01.local")
 
 For cleanup, just call `KantanCluster.stop/0`, which will stop the node and all the connections.
 
-Some code is adopted from [`livebook`]. Thanks you!
+## Publish–subscribe
+
+```elixir
+KantanCluster.subscribe("users:123")
+
+KantanCluster.broadcast("users:123", {:hello, Node.self()})
+```
+
+## Acknowledgements
+
+Some code is adopted from or inspired by [`livebook`].
 
 <!-- Links -->
 
