@@ -29,12 +29,9 @@ end
 Start a node and connect it to other nodes based on specified [options].
 
 ```elixir
-iex> KantanCluster.start(
-  node: "node1",
-  cookie: :hello,
-  connect_to: [:"nerves@nerves-mn00.local"]
-)
-:ok
+iex> KantanCluster.start(node: "node1", cookie: :hello)
+
+iex> KantanCluster.connect(:"nerves@nerves-mn00.local")
 
 iex(node1@My-Machine.local)>
 ```
@@ -47,6 +44,8 @@ config :kantan_cluster,
   cookie: :hello,
   connect_to: [:"nerves@nerves-mn00.local"]
 ```
+
+![KantanCluster 2 Screen Recording 2022-01-09 at 9 50 57 PM](https://user-images.githubusercontent.com/7563926/148714689-303761c7-16d7-4fc2-8e72-3b04c81d4efc.gif)
 
 `kantan_cluster` starts a server that monitors the connection per node name under a `DynamicSupervisor`.
 
@@ -66,15 +65,32 @@ KantanCluster.disconnect(:"nerves@nerves-mn01.local")
 
 For cleanup, just call `KantanCluster.stop/0`, which will stop the node and all the connections.
 
-## Publish–subscribe
+## Publish-subscribe
+
+The publish-subscribe allows us to make a published message available from anywhere in a cluster.
+Under the hood, `kantan_cluster` uses [`phoenix_pubsub`] for all the heavy-lifting.
 
 ```elixir
-# Subscribes the caller to the KantanCluster's topic.
-KantanCluster.subscribe("users:123")
+# Somebody may publish temperature data on the topic "hello_nerves:measurements".
+message = {:hello_nerves_measurements, %{temperature_c: 30.1}, node()}
+KantanCluster.broadcast("hello_nerves:measurements", message)
 
-# Broadcasts message on given topic across the whole cluster.
-KantanCluster.broadcast("users:123", {:hello, Node.self()})
+# Anybody within the same cluster can subscribe to the topic and receive messages on the topic.
+KantanCluster.subscribe("hello_nerves:measurements")
+
+# In the subscribing process, you may receive the message using GenServer's handle_info callback.
+defmodule HelloNervesSubscriber do
+  use GenServer
+
+  # ...
+
+  @impl GenServer
+  def handle_info({:hello_nerves_measurement, measurement, _node}, state) do
+    {:noreply, %{state | last_measurement: measurement}}
+  end
 ```
+
+![kantan_cluster_inky_experiment_20220109_175511](https://user-images.githubusercontent.com/7563926/148710739-a11e504f-3398-4732-8531-cdb9292b672e.jpg)
 
 ## Acknowledgements
 
@@ -88,3 +104,4 @@ KantanCluster.broadcast("users:123", {:hello, Node.self()})
 [`livebook`]: https://github.com/livebook-dev/livebook
 [options]: https://hexdocs.pm/kantan_cluster/KantanCluster.html#t:option/0
 [Nerves]: https://www.nerves-project.org/
+[`phoenix_pubsub`]: https://hexdocs.pm/phoenix_pubsub/Phoenix.PubSub.html

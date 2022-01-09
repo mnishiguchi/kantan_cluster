@@ -1,17 +1,19 @@
 defmodule KantanCluster.PubSub do
-  @moduledoc false
+  @moduledoc """
+  A thin wrapper around `Phoenix.PubSub`.
+  """
 
-  @spec subscribe(binary) :: :ok | {:error, any}
+  @spec subscribe(Phoenix.PubSub.topic()) :: :ok | {:error, any}
   def subscribe(topic) do
     Phoenix.PubSub.subscribe(__MODULE__, topic)
   end
 
-  @spec unsubscribe(binary) :: :ok
+  @spec unsubscribe(Phoenix.PubSub.topic()) :: :ok
   def unsubscribe(topic) do
     Phoenix.PubSub.unsubscribe(__MODULE__, topic)
   end
 
-  @spec broadcast(binary, any) :: :ok | {:error, any}
+  @spec broadcast(Phoenix.PubSub.topic(), Phoenix.PubSub.message()) :: :ok | {:error, any}
   def broadcast(topic, message) do
     Phoenix.PubSub.broadcast(__MODULE__, topic, message)
   end
