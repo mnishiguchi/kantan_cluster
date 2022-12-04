@@ -28,32 +28,48 @@ end
 
 Start a node and connect it to other nodes based on specified [options].
 
+Start `node1` in an IEx shell, then attempt to connect it to `node2` that is not started yet.
+
 ```elixir
-iex> KantanCluster.start(node: "node1", cookie: :hello)
+iex> KantanCluster.start(name: :"node1@127.0.0.1", cookie: :hello, connect_to: :"node2@127.0.0.1")
+:ok
 
-iex> KantanCluster.connect(:"nerves@nerves-mn00.local")
+iex(node1@127.0.0.1)2>
+16:50:10.851 [warning] could not connect node1@127.0.0.1 to node2@127.0.0.1
+```
 
-iex(node1@My-Machine.local)>
+Start `node2` in another IEx shell, then the two nodes get connected.
+
+See what happens in `node1`, when `node2` is stopped and gets started again,
+
+```elixir
+iex> KantanCluster.start(name: :"node2@127.0.0.1", cookie: :hello)
+:ok
+
+iex(node2@127.0.0.1)2> Node.list
+[:"node1@127.0.0.1"]
+
+iex(node2@127.0.0.1)3> Node.stop
+:ok
+
+iex> KantanCluster.start(name: :"node2@127.0.0.1", cookie: :hello)
+:ok
 ```
 
 Alternatively, [options] can be loaded from your `config/config.exs`.
 
 ```elixir
 config :kantan_cluster,
-  node: "node1",
+  name: :"node1@127.0.0.1",
   cookie: :hello,
-  connect_to: [:"nerves@nerves-mn00.local"]
+  connect_to: [:"node2@127.0.0.1"]
 ```
-
-![KantanCluster 2 Screen Recording 2022-01-09 at 9 50 57 PM](https://user-images.githubusercontent.com/7563926/148714689-303761c7-16d7-4fc2-8e72-3b04c81d4efc.gif)
 
 `kantan_cluster` starts a server that monitors the connection per node name under a `DynamicSupervisor`.
 
 ![](https://user-images.githubusercontent.com/7563926/139163607-704c0352-64ff-47f3-8697-9958654c27b4.png)
 
 `kantan_cluster` monitors all the connected nodes and attempts to reconnect them automatically in case they get disconnected.
-
-![](https://user-images.githubusercontent.com/7563926/138617820-562b8102-c478-424d-bfaa-e15abf08a722.png)
 
 You can connect to or disconnect from a node on demand.
 
