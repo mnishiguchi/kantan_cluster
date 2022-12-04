@@ -15,13 +15,13 @@ defmodule KantanCluster.NodeConnector do
   """
   @spec start_link(node) :: GenServer.on_start()
   def start_link(connect_to) when is_atom(connect_to) do
-    if Node.self() == :nonode@nohost do
-      :ignore
-    else
+    if Node.alive?() do
       case whereis(connect_to) do
         nil -> GenServer.start_link(__MODULE__, connect_to, name: via(connect_to))
         pid -> {:ok, pid}
       end
+    else
+      :ignore
     end
   end
 
@@ -47,7 +47,6 @@ defmodule KantanCluster.NodeConnector do
 
   @impl GenServer
   def init(connect_to) do
-    ensure_connection(connect_to)
     send(self(), :tick)
 
     {:ok, %{connect_to: connect_to}}
@@ -55,29 +54,19 @@ defmodule KantanCluster.NodeConnector do
 
   @impl GenServer
   def handle_info(:tick, state) do
-    if Node.self() == :nonode@nohost do
-      # If node is stopped, there is no need for monitoring.
-      {:stop, :normal, state}
-    else
+    if Node.alive?() do
       # Node.monitor/2 does not trigger :nodedown every now and then. Pinging
       # periodically is more reliable for monitoring connected nodes.
       Process.send_after(self(), :tick, @polling_interval_ms)
 
-      Node.ping(state.connect_to)
+      if :pang == Node.ping(state.connect_to) do
+        Logger.warning("could not connect #{node()} to #{state.connect_to}")
+      end
 
       {:noreply, state}
-    end
-  end
-
-  @spec ensure_connection(node) :: :ok | :error
-  defp ensure_connection(connect_to) do
-    case Node.ping(connect_to) do
-      :pong ->
-        :ok
-
-      :pang ->
-        Logger.warning("could not connect #{Node.self()} to #{connect_to}")
-        :error
+    else
+      # If node is stopped, there is no need for monitoring.
+      {:stop, :normal, state}
     end
   end
 end

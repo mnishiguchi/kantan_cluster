@@ -118,9 +118,7 @@ defmodule KantanCluster do
 
   @spec ensure_distribution!(keyword) :: :ok
   defp ensure_distribution!(opts) do
-    if Node.alive?() do
-      Logger.info("distributed node already started: #{Node.self()}")
-    else
+    unless Node.alive?() do
       case System.cmd("epmd", ["-daemon"]) do
         {_, 0} -> :ok
         _ -> raise("could not start epmd (Erlang Port Mapper Driver).")
