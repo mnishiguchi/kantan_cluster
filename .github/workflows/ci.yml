@@ -3,14 +3,14 @@ on: [push, pull_request]
 jobs:
   deps:
     name: Dependencies
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         include:
-          - elixir: 1.11
-            otp: 23
-          - elixir: 1.12
+          - elixir: 1.13
             otp: 24
+          - elixir: 1.14
+            otp: 25
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.6.0
@@ -51,14 +51,14 @@ jobs:
   static_code_analysis:
     name: Static Code Analysis
     needs: deps
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         include:
-          - elixir: 1.11
-            otp: 23
-          - elixir: 1.12
+          - elixir: 1.13
             otp: 24
+          - elixir: 1.14
+            otp: 25
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.6.0
@@ -98,15 +98,15 @@ jobs:
   unit_tests:
     name: Unit Tests
     needs: deps
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
         include:
-          - elixir: 1.11
-            otp: 23
-          - elixir: 1.12
+          - elixir: 1.13
             otp: 24
+          - elixir: 1.14
+            otp: 25
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.6.0
