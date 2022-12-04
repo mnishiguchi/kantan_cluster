@@ -97,13 +97,17 @@ defmodule KantanCluster do
   * topic - The topic to subscribe to, for example: "users:123"
   """
   @spec subscribe(binary) :: :ok | {:error, any}
-  defdelegate subscribe(topic), to: KantanCluster.PubSub
+  def subscribe(topic) do
+    Phoenix.PubSub.subscribe(KantanCluster.PubSub, topic)
+  end
 
   @doc """
   Unsubscribes the caller from a given topic.
   """
   @spec unsubscribe(binary) :: :ok
-  defdelegate unsubscribe(topic), to: KantanCluster.PubSub
+  def unsubscribe(topic) do
+    Phoenix.PubSub.unsubscribe(KantanCluster.PubSub, topic)
+  end
 
   @doc """
   Broadcasts message on a given topic across the whole cluster.
@@ -112,7 +116,9 @@ defmodule KantanCluster do
   * message - The payload of the broadcast
   """
   @spec broadcast(binary, any) :: :ok | {:error, any}
-  defdelegate broadcast(topic, message), to: KantanCluster.PubSub
+  def broadcast(topic, message) do
+    Phoenix.PubSub.broadcast(KantanCluster.PubSub, topic, message)
+  end
 
   @spec ensure_distribution!(keyword) :: :ok
   defp ensure_distribution!(opts) do
