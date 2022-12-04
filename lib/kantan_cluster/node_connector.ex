@@ -47,7 +47,7 @@ defmodule KantanCluster.NodeConnector do
 
   @impl GenServer
   def init(connect_to) do
-    connect_node(connect_to)
+    ensure_connection(connect_to)
     send(self(), :tick)
 
     {:ok, %{connect_to: connect_to}}
@@ -63,22 +63,21 @@ defmodule KantanCluster.NodeConnector do
       # periodically is more reliable for monitoring connected nodes.
       Process.send_after(self(), :tick, @polling_interval_ms)
 
-      if :pang == Node.ping(state.connect_to) do
-        connect_node(state.connect_to)
-      end
+      Node.ping(state.connect_to)
 
       {:noreply, state}
     end
   end
 
-  @spec connect_node(node) :: boolean
-  defp connect_node(connect_to) do
-    if connected = Node.connect(connect_to) do
-      Logger.info("connected from #{Node.self()} to #{connect_to}")
-    else
-      Logger.warning("could not connect from #{Node.self()} to #{connect_to}")
-    end
+  @spec ensure_connection(node) :: :ok | :error
+  defp ensure_connection(connect_to) do
+    case Node.ping(connect_to) do
+      :pong ->
+        :ok
 
-    connected
+      :pang ->
+        Logger.warning("could not connect #{Node.self()} to #{connect_to}")
+        :error
+    end
   end
 end

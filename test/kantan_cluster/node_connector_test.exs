@@ -13,7 +13,7 @@ defmodule KantanCluster.NodeConnectorTest do
       assert :ignore == NodeConnector.start_link(:"node@127.0.0.1")
     end
 
-    test "unique pid" do
+    test "unique pid per node" do
       Node.start(:"node@127.0.0.1")
       assert {:ok, pid} = NodeConnector.start_link(:"node@127.0.0.1")
       assert {:ok, ^pid} = NodeConnector.start_link(:"node@127.0.0.1")

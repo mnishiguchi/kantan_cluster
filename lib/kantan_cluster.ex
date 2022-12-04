@@ -13,13 +13,15 @@ defmodule KantanCluster do
   @typedoc """
   Options for a cluster.
 
-  * `:node`
-    - the name of a node that you want to start
-    - default: `{:longnames, :"xxxx@yyyy.local"}` where `xxxx` is a random string, `yyyy` is the hostname of a machine
+  * `:name`
+    - the fully-qualified name of a node that you want to start
     - examples:
-      - `"node1"`
-      - `{:longnames, :"node1@nerves-mn00.local"`}
-      - `{:shortnames, :"node1@nerves-mn00"`}
+      - `:"node1@172.17.0.8"`
+  * `:sname`
+    - the short name of a node that you want to start
+    - examples:
+      - `:node1`
+      - `:"node1@localhost"`
   * `:cookie`
     - [Erlang magic cookie] to form a cluster
     - default: random cookie
@@ -30,7 +32,8 @@ defmodule KantanCluster do
   [Erlang magic cookie]: https://erlang.org/doc/reference_manual/distributed.html#security
   """
   @type option() ::
-          {:node, binary | {node_type, node}}
+          {:name, node}
+          | {:sname, node}
           | {:cookie, atom}
           | {:connect_to, node | [node]}
 
@@ -39,17 +42,17 @@ defmodule KantanCluster do
   options can be specified as an argument
 
       KantanCluster.start(
-        node: "node1",
-        cookie: :hello,
-        connect_to: [:"nerves@nerves-mn00.local"]
+        name: :"hoge@172.17.0.7",
+        cookie: :mycookie,
+        connect_to: [:"piyo@172.17.0.8"]
       )
 
   or in your `config/config.exs`.
 
       config :kantan_cluster,
-        node: "node1",
-        cookie: :hello,
-        connect_to: [:"nerves@nerves-mn00.local"]
+        name: :"hoge@172.17.0.7",
+        cookie: :mycookie,
+        connect_to: [:"piyo@172.17.0.8"]
 
   """
   @spec start([option]) :: :ok

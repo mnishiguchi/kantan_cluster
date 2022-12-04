@@ -11,7 +11,7 @@ defmodule KantanClusterTest do
 
     :ok =
       KantanCluster.start(
-        node: {:longnames, :"node1@127.0.0.1"},
+        name: :"node1@127.0.0.1",
         cookie: :my_secred_cookie,
         connect_to: [:"node2@127.0.0.1", :"node3@127.0.0.1"]
       )

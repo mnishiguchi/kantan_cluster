@@ -2,34 +2,27 @@ defmodule KantanCluster.Config do
   @moduledoc false
 
   def get_node_option(opts) do
-    (opts[:node] || Application.get_env(:kantan_cluster, :node))
-    |> parse_node_option()
+    [
+      Keyword.take(opts, [:name]),
+      Keyword.take(opts, [:sname]),
+      Keyword.take(Application.get_all_env(:kantan_cluster), [:name]),
+      Keyword.take(Application.get_all_env(:kantan_cluster), [:sname])
+    ]
+    |> List.flatten()
+    |> List.first()
+    |> valid_node_option()
   end
 
-  # when node option is explicit
-  defp parse_node_option({:longnames, _} = node_opt), do: node_opt
-  defp parse_node_option({:shortnames, _} = node_opt), do: node_opt
+  defp valid_node_option(nil), do: {:shortnames, :"n_#{KantanCluster.Utils.random_short_id()}"}
+  defp valid_node_option({:name, name}), do: {:longnames, name}
+  defp valid_node_option({:sname, name}), do: {:shortnames, name}
+  defp valid_node_option(invalid), do: raise("Invalid node option #{inspect(invalid)}")
 
-  # when node option is inplicit
-  defp parse_node_option(nil) do
-    {:ok, hostname} = :inet.gethostname()
-    {:longnames, :"n_#{KantanCluster.Utils.random_short_id()}@#{hostname}.local"}
+  def get_cookie_option(opts, default \\ KantanCluster.Utils.random_cookie()) do
+    opts[:cookie] || Application.get_env(:kantan_cluster, :cookie) || default
   end
 
-  defp parse_node_option(node_opt) when is_binary(node_opt) do
-    {:ok, hostname} = :inet.gethostname()
-    {:longnames, :"#{node_opt}@#{hostname}.local"}
-  end
-
-  def get_cookie_option(opts) do
-    opts[:cookie] ||
-      Application.get_env(:kantan_cluster, :cookie) ||
-      KantanCluster.Utils.random_cookie()
-  end
-
-  def get_connect_to_option(opts) do
-    opts[:connect_to] ||
-      Application.get_env(:kantan_cluster, :connect_to) ||
-      []
+  def get_connect_to_option(opts, default \\ []) do
+    opts[:connect_to] || Application.get_env(:kantan_cluster, :connect_to) || default
   end
 end
