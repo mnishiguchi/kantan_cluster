@@ -6,11 +6,6 @@ defmodule KantanCluster do
   require Logger
 
   @typedoc """
-  A node type. See `Node.start/3`.
-  """
-  @type node_type :: :longnames | :shortnames
-
-  @typedoc """
   Options for a cluster.
 
   * `:name`
@@ -26,7 +21,7 @@ defmodule KantanCluster do
     - [Erlang magic cookie] to form a cluster
     - default: random cookie
   * `:connect_to`
-    - a list of nodes we want our node to be connected with
+    - a list of nodes we want your node to be connected with
     - default: `[]`
 
   [Erlang magic cookie]: https://erlang.org/doc/reference_manual/distributed.html#security
@@ -104,6 +99,9 @@ defmodule KantanCluster do
   @spec subscribe(binary) :: :ok | {:error, any}
   defdelegate subscribe(topic), to: KantanCluster.PubSub
 
+  @doc """
+  Unsubscribes the caller from a given topic.
+  """
   @spec unsubscribe(binary) :: :ok
   defdelegate unsubscribe(topic), to: KantanCluster.PubSub
 

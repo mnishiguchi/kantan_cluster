@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2022-12-04
+
+- Change `node` option to explicit `name` and `sname` options
+- Refactor internal logic using `Node.ping/0` and `Node.alive?/0`
+- Update dependencies
+
 ## [0.3.1] - 2021-10-30
 
 - Add `KantanCluster.unsubscribe/2`
@@ -53,7 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2021-10-25
 - Initial release
 
-[Unreleased]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.3.1..HEAD
+[Unreleased]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.4.0..HEAD
+[0.4.0]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.3.1..v0.4.0
 [0.3.1]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.3.0..v0.3.1
 [0.3.0]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.2.4..v0.3.0
 [0.2.4]: https://github.com/mnishiguchi/kantan_cluster/compare/v0.2.3..v0.2.4

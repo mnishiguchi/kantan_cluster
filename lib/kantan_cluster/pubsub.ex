@@ -1,7 +1,6 @@
 defmodule KantanCluster.PubSub do
-  @moduledoc """
-  A thin wrapper around `Phoenix.PubSub`.
-  """
+  # A thin wrapper around `Phoenix.PubSub`.
+  @moduledoc false
 
   @spec subscribe(Phoenix.PubSub.topic()) :: :ok | {:error, any}
   def subscribe(topic) do
