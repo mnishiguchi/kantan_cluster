@@ -21,8 +21,4 @@ defmodule KantanCluster.Config do
   def get_cookie_option(opts, default \\ KantanCluster.Utils.random_cookie()) do
     opts[:cookie] || Application.get_env(:kantan_cluster, :cookie) || default
   end
-
-  def get_connect_to_option(opts, default \\ []) do
-    opts[:connect_to] || Application.get_env(:kantan_cluster, :connect_to) || default
-  end
 end

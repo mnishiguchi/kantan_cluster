@@ -2,17 +2,20 @@
 
 かんたんクラスター
 
-[![Hex version](https://img.shields.io/hexpm/v/kantan_cluster.svg 'Hex version')](https://hex.pm/packages/kantan_cluster)
-[![API docs](https://img.shields.io/hexpm/v/kantan_cluster.svg?label=docs 'API docs')](https://hexdocs.pm/kantan_cluster)
+[![Hex version](https://img.shields.io/hexpm/v/kantan_cluster.svg "Hex version")](https://hex.pm/packages/kantan_cluster)
+[![API docs](https://img.shields.io/hexpm/v/kantan_cluster.svg?label=docs "API docs")](https://hexdocs.pm/kantan_cluster)
 [![CI](https://github.com/mnishiguchi/kantan_cluster/actions/workflows/ci.yml/badge.svg)](https://github.com/mnishiguchi/kantan_cluster/actions/workflows/ci.yml)
+
+<!-- MODULEDOC -->
 
 Form a simple Erlang cluster easily in Elixir.
 
-- A wrapper of [`Node`] and [`Phoenix.PubSub`] with simple API
-- Reconnection forever in case nodes get disconnected
+KantanCluster is a thin wrapper around
+[libcluster](https://hexdocs.pm/libcluster) and
+[phoenix_pubsub](https://hexdocs.pm/phoenix_pubsub). It allows you to try out
+distributed Erlang nodes easily.
 
-[`Node`]: https://hexdocs.pm/elixir/Node.html
-[`Phoenix.PubSub`]: https://hexdocs.pm/phoenix_pubsub/Phoenix.PubSub.html
+<!-- MODULEDOC -->
 
 ## Getting started
 
@@ -21,73 +24,74 @@ Add `kantan_cluster` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:kantan_cluster, "~> 0.3"}
+    {:kantan_cluster, "~> 0.5"}
   ]
 end
 ```
 
-Start a node and connect it to other nodes based on specified [options].
+## Demo
 
-Start `node1` in an IEx shell, then attempt to connect it to `node2` that is not started yet.
-
-```elixir
-iex> KantanCluster.start(name: :"node1@127.0.0.1", cookie: :hello, connect_to: :"node2@127.0.0.1")
-:ok
-
-iex(node1@127.0.0.1)2>
-16:50:10.851 [warning] could not connect node1@127.0.0.1 to node2@127.0.0.1
-```
-
-Start `node2` in another IEx shell, then the two nodes get connected.
-
-See what happens in `node1`, when `node2` is stopped and gets started again,
+Open an interactive [Elixir shell
+(IEx)](https://elixir-lang.org/getting-started/introduction.html#interactive-mode)
+in a terminal, and start a node with node name and cookie.
 
 ```elixir
-iex> KantanCluster.start(name: :"node2@127.0.0.1", cookie: :hello)
-:ok
+iex
 
-iex(node2@127.0.0.1)2> Node.list
-[:"node1@127.0.0.1"]
-
-iex(node2@127.0.0.1)3> Node.stop
-:ok
-
-iex> KantanCluster.start(name: :"node2@127.0.0.1", cookie: :hello)
-:ok
+iex> Mix.install([{:kantan_cluster, "~> 0.5"}])
+iex> KantanCluster.start_node(sname: :node1, cookie: :hello)
 ```
 
-Alternatively, [options] can be loaded from your `config/config.exs`.
+Open another terminal and do the same with a different node name. Make sure
+that the cookie is the same.
+
+```elixir
+iex
+
+iex> Mix.install([{:kantan_cluster, "~> 0.5"}])
+iex> KantanCluster.start_node(sname: :node2, cookie: :hello)
+```
+
+These two nodes will be connected to each other automatically.
+
+## Configuration
+
+Alternatively, [options] can be loaded from your project's `config/config.exs`.
+For available clustering strategies, see https://hexdocs.pm/libcluster/readme.html#clustering.
 
 ```elixir
 config :kantan_cluster,
   name: :"node1@127.0.0.1",
-  cookie: :hello,
-  connect_to: [:"node2@127.0.0.1"]
+  cookie: :super_secure_erlang_magic_cookie,
+  topologies: [gossip_example: [
+    strategy: Cluster.Strategy.Gossip,
+    secret: "super_secure_gossip_secret"
+  ]]
 ```
 
-`kantan_cluster` starts a server that monitors the connection per node name under a `DynamicSupervisor`.
+## Publish-Subscribe
 
-![](https://user-images.githubusercontent.com/7563926/139163607-704c0352-64ff-47f3-8697-9958654c27b4.png)
-
-`kantan_cluster` monitors all the connected nodes and attempts to reconnect them automatically in case they get disconnected.
-
-You can connect to or disconnect from a node on demand.
+Under the hood, `kantan_cluster` uses [phoenix_pubsub] for all the heavy-lifting.
 
 ```elixir
-KantanCluster.connect(:"nerves@nerves-mn01.local")
-
-KantanCluster.disconnect(:"nerves@nerves-mn01.local")
+# subscribe to hello topic in one node
+iex(hoge@my-machine)> KantanCluster.subscribe("hello")
 ```
 
-For cleanup, just call `KantanCluster.stop/0`, which will stop the node and all the connections.
-
-## Publish-subscribe
-
-The publish-subscribe allows us to make a published message available from anywhere in a cluster.
-Under the hood, `kantan_cluster` uses [`phoenix_pubsub`] for all the heavy-lifting.
+```elixir
+# publish a message to hello topic in another node
+iex(piyo@my-machine)> KantanCluster.broadcast("hello", %{motto: "元気があればなんでもできる"})
+```
 
 ```elixir
-# Somebody may publish temperature data on the topic "hello_nerves:measurements".
+# check the mailbox in a node that subscribes hello topic
+iex(hoge@my-machine)> flush
+```
+
+The messages can be handled with a `GenServer` like below.
+
+```elixir
+# Somebody in the cluster may publish temperature data on the topic "hello_nerves:measurements".
 message = {:hello_nerves_measurements, %{temperature_c: 30.1}, node()}
 KantanCluster.broadcast("hello_nerves:measurements", message)
 
@@ -110,14 +114,17 @@ defmodule HelloNervesSubscriber do
 
 ## Acknowledgements
 
-- This project is inspired by [nerves_pack（vintage_net含む）を使ってNerves起動時に`Node.connect()`するようにした by nishiuchikazuma](https://qiita.com/nishiuchikazuma/items/f68d2661959197d0765c).
-- [Forming an Erlang cluster of Pi Zeros by underjord](https://youtu.be/ZdtAVlzFf6Q) is a great hands-on tutorial for connecting multiple [Nerves] devices.
-- Some code is adopted from [`livebook`].
+This project is inspired by the following:
+- [nerves_pack（vintage_net 含む）を使って Nerves 起動時に`Node.connect()`するようにした by nishiuchikazuma](https://qiita.com/nishiuchikazuma/items/f68d2661959197d0765c)
+- [Forming an Erlang cluster of Pi Zeros by underjord](https://youtu.be/ZdtAVlzFf6Q) --- a great hands-on tutorial for connecting multiple [Nerves] devices
+- [Let's Talk by Herman Verschooten](https://til.verschooten.name/til/2023-08-13/lets-talk)
+- [Exploring Elixir Episode 7: Effortless Scaling With Automatic Clusters](https://www.youtube.com/watch?v=zQEgEnjuQsU)
+- [livebook]
 
 <!-- Links -->
 
 [Erlang magic cookie]: https://erlang.org/doc/reference_manual/distributed.html#security
-[`livebook`]: https://github.com/livebook-dev/livebook
+[livebook]: https://github.com/livebook-dev/livebook
 [options]: https://hexdocs.pm/kantan_cluster/KantanCluster.html#t:option/0
 [Nerves]: https://www.nerves-project.org/
-[`phoenix_pubsub`]: https://hexdocs.pm/phoenix_pubsub/Phoenix.PubSub.html
+[phoenix_pubsub]: https://hexdocs.pm/phoenix_pubsub/Phoenix.PubSub.html

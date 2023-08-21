@@ -13,7 +13,6 @@ defmodule KantanCluster.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
-      aliases: aliases(),
       dialyzer: dialyzer(),
       docs: docs()
     ]
@@ -30,17 +29,18 @@ defmodule KantanCluster.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.24", only: :dev, runtime: false},
-      {:mix_test_watch, "~> 1.1", only: :dev, runtime: false},
-      {:phoenix_pubsub, "~> 2.0"}
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.3", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.30", only: [:dev], runtime: false},
+      {:libcluster, "~> 3.3"},
+      {:mix_test_watch, "~> 1.1", only: [:dev], runtime: false},
+      {:phoenix_pubsub, "~> 2.1"}
     ]
   end
 
   defp dialyzer() do
     [
-      flags: [:race_conditions, :unmatched_returns, :error_handling, :underspecs]
+      flags: [:extra_return, :unmatched_returns, :error_handling]
     ]
   end
 
@@ -68,13 +68,5 @@ defmodule KantanCluster.MixProject do
         "GitHub" => @source_url
       }
     }
-  end
-
-  # Aliases are shortcuts or tasks specific to the current project.
-  # See the documentation for `Mix` for more info on aliases.
-  defp aliases do
-    [
-      format: ["format", "credo"]
-    ]
   end
 end

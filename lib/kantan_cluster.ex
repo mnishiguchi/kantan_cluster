@@ -1,9 +1,9 @@
 defmodule KantanCluster do
-  @moduledoc """
-  Form a simple Erlang cluster easily in Elixir.
-  """
+  @moduledoc File.read!("README.md")
+             |> String.split("<!-- MODULEDOC -->")
+             |> hd()
 
-  require Logger
+  @pubsub_name KantanCluster.PubSub
 
   @typedoc """
   Options for a cluster.
@@ -18,106 +18,47 @@ defmodule KantanCluster do
       - `:node1`
       - `:"node1@localhost"`
   * `:cookie`
-    - [Erlang magic cookie] to form a cluster
+    - [Erlang magic cookie](https://erlang.org/doc/reference_manual/distributed.html#security) to form a cluster
     - default: random cookie
-  * `:connect_to`
-    - a list of nodes we want your node to be connected with
-    - default: `[]`
-
-  [Erlang magic cookie]: https://erlang.org/doc/reference_manual/distributed.html#security
+  * `:topologies`
+    - the topologies for `Cluster.Supervisor`
+    - For available clustering strategies, see https://hexdocs.pm/libcluster/readme.html#clustering.
   """
+
   @type option() ::
           {:name, node}
           | {:sname, node}
           | {:cookie, atom}
-          | {:connect_to, node | [node]}
+          | {:topologies, keyword}
+
+  @type topic :: binary
+  @type message :: any
+  @type node_name :: atom | binary
+
+  ## node
 
   @doc """
-  Starts a node and attempts to connect it to specified nodes. Configuration
-  options can be specified as an argument
+  Starts a node. Configuration
+  options can be specified as a keyword argument
 
       KantanCluster.start(
         name: :"hoge@172.17.0.7",
-        cookie: :mycookie,
-        connect_to: [:"piyo@172.17.0.8"]
+        cookie: :mycookie
       )
 
   or in your `config/config.exs`.
 
       config :kantan_cluster,
         name: :"hoge@172.17.0.7",
-        cookie: :mycookie,
-        connect_to: [:"piyo@172.17.0.8"]
+        cookie: :mycookie
 
   """
-  @spec start([option]) :: :ok
-  def start(opts \\ []) when is_list(opts) do
+  @spec start_node([option]) :: :ok
+  def start_node(opts \\ []) when is_list(opts) do
     ensure_distribution!(opts)
     validate_hostname_resolution!()
     KantanCluster.Config.get_cookie_option(opts) |> Node.set_cookie()
-    KantanCluster.Config.get_connect_to_option(opts) |> connect()
     :ok
-  end
-
-  @doc """
-  Stops a node and all the connections.
-  """
-  @spec stop :: :ok | {:error, :not_allowed | :not_found}
-  def stop() do
-    KantanCluster.NodeConnectorSupervisor.terminate_children()
-    Node.stop()
-  end
-
-  @doc """
-  Connects current node to specified nodes.
-  """
-  @spec connect(node | [node]) :: {:ok, [pid]}
-  def connect(connect_to) when is_atom(connect_to), do: connect([connect_to])
-
-  def connect(connect_to) when is_list(connect_to) do
-    pids =
-      Enum.map(connect_to, &KantanCluster.NodeConnectorSupervisor.find_or_start_child_process/1)
-
-    {:ok, pids}
-  end
-
-  @doc """
-  Disconnects current node from speficied nodes.
-  """
-  @spec disconnect(node | [node]) :: :ok
-  def disconnect(node_name) when is_atom(node_name), do: disconnect([node_name])
-
-  def disconnect(node_names) when is_list(node_names) do
-    :ok = Enum.each(node_names, &KantanCluster.NodeConnector.disconnect/1)
-  end
-
-  @doc """
-  Subscribes the caller to a given topic.
-
-  * topic - The topic to subscribe to, for example: "users:123"
-  """
-  @spec subscribe(binary) :: :ok | {:error, any}
-  def subscribe(topic) do
-    Phoenix.PubSub.subscribe(KantanCluster.PubSub, topic)
-  end
-
-  @doc """
-  Unsubscribes the caller from a given topic.
-  """
-  @spec unsubscribe(binary) :: :ok
-  def unsubscribe(topic) do
-    Phoenix.PubSub.unsubscribe(KantanCluster.PubSub, topic)
-  end
-
-  @doc """
-  Broadcasts message on a given topic across the whole cluster.
-
-  * topic - The topic to broadcast to, ie: "users:123"
-  * message - The payload of the broadcast
-  """
-  @spec broadcast(binary, any) :: :ok | {:error, any}
-  def broadcast(topic, message) do
-    Phoenix.PubSub.broadcast(KantanCluster.PubSub, topic, message)
   end
 
   @spec ensure_distribution!(keyword) :: :ok
@@ -174,5 +115,75 @@ defmodule KantanCluster do
 
     Make sure your computer's name resolves locally or start KantanCluster using a long distribution name.
     """)
+  end
+
+  ## pubsub
+
+  def pubsub_name(), do: @pubsub_name
+
+  @doc "See `Phoenix.PubSub.broadcast/4`"
+  @spec broadcast(topic, message) :: :ok | {:error, term}
+  def broadcast(topic, message) do
+    Phoenix.PubSub.broadcast(@pubsub_name, topic, message)
+  end
+
+  @doc "See `Phoenix.PubSub.broadcast!/4`"
+  @spec broadcast!(topic, message) :: :ok
+  def broadcast!(topic, message) do
+    Phoenix.PubSub.broadcast(@pubsub_name, topic, message)
+  end
+
+  @doc "See `Phoenix.PubSub.broadcast_from/5`"
+  @spec broadcast_from(pid, topic, message) :: :ok | {:error, term}
+  def broadcast_from(from, topic, message) do
+    Phoenix.PubSub.broadcast_from(@pubsub_name, from, topic, message)
+  end
+
+  @doc "See `Phoenix.PubSub.broadcast_from!/5`"
+  @spec broadcast_from!(pid, topic, message) :: :ok
+  def broadcast_from!(from, topic, message) do
+    Phoenix.PubSub.broadcast_from!(@pubsub_name, from, topic, message)
+  end
+
+  @doc "See `Phoenix.PubSub.direct_broadcast/5`"
+  @spec direct_broadcast(node_name, topic, message) :: :ok
+  def direct_broadcast(node_name, topic, message) do
+    Phoenix.PubSub.direct_broadcast(node_name, @pubsub_name, topic, message)
+  end
+
+  @doc "See `Phoenix.PubSub.direct_broadcast!/5`"
+  @spec direct_broadcast!(node_name, topic, message) :: :ok
+  def direct_broadcast!(node_name, topic, message) do
+    Phoenix.PubSub.direct_broadcast!(node_name, @pubsub_name, topic, message)
+  end
+
+  @doc "See `Phoenix.PubSub.local_broadcast/4`"
+  @spec local_broadcast(topic, message) :: :ok
+  def local_broadcast(topic, message) do
+    Phoenix.PubSub.local_broadcast(@pubsub_name, topic, message)
+  end
+
+  @doc "See `Phoenix.PubSub.local_broadcast_from/5`"
+  @spec local_broadcast_from(pid, topic, message) :: :ok
+  def local_broadcast_from(from, topic, message) do
+    Phoenix.PubSub.local_broadcast_from(@pubsub_name, from, topic, message)
+  end
+
+  @doc "See `Phoenix.PubSub.node_name/1`"
+  @spec node_name :: node_name
+  def node_name() do
+    Phoenix.PubSub.node_name(@pubsub_name)
+  end
+
+  @doc "See `Phoenix.PubSub.subscribe/3`"
+  @spec subscribe(topic, keyword) :: :ok | {:error, term}
+  def subscribe(topic, opts \\ []) do
+    Phoenix.PubSub.subscribe(@pubsub_name, topic, opts)
+  end
+
+  @doc "See `Phoenix.PubSub.unsubscribe/2`"
+  @spec unsubscribe(topic) :: :ok
+  def unsubscribe(topic) do
+    Phoenix.PubSub.unsubscribe(@pubsub_name, topic)
   end
 end
