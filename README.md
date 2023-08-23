@@ -80,7 +80,7 @@ iex(hoge@my-machine)> KantanCluster.subscribe("hello")
 
 ```elixir
 # publish a message to hello topic in another node
-iex(piyo@my-machine)> KantanCluster.broadcast("hello", %{motto: "元気があればなんでもできる"})
+iex(piyo@my-machine)> KantanCluster.broadcast("hello", %{motto: "元氣があればなんでもできる"})
 ```
 
 ```elixir
