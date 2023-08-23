@@ -20,16 +20,12 @@ defmodule KantanCluster do
   * `:cookie`
     - [Erlang magic cookie](https://erlang.org/doc/reference_manual/distributed.html#security) to form a cluster
     - default: random cookie
-  * `:topologies`
-    - the topologies for `Cluster.Supervisor`
-    - For available clustering strategies, see https://hexdocs.pm/libcluster/readme.html#clustering.
   """
 
   @type option() ::
           {:name, node}
           | {:sname, node}
           | {:cookie, atom}
-          | {:topologies, keyword}
 
   @type topic :: binary
   @type message :: any
